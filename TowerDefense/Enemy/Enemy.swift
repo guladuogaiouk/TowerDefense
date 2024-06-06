@@ -16,12 +16,14 @@ class Enemy: Identifiable{
     var hp: Int
     var value: Int
     var position: (Double,Double)
-    init(name: String, speed: Double, hp: Int, value: Int, position: (Double,Double)) {
+    var img: String
+    init(name: String, speed: Double, hp: Int, value: Int, position: (Double,Double), img: String) {
         self.id = UUID()
         self.name = name
         self.speed = speed
         self.hp = hp
         self.value = value
         self.position = position
+        self.img = img
     }
 }

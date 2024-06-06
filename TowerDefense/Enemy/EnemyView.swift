@@ -8,14 +8,17 @@
 import SwiftUI
 
 struct EnemyView: View {
-    
+    var img: String
     var body: some View {
-        Circle()
-            .fill(Color.red)
+//        Circle()
+//            .fill(Color.red)
+//            .frame(width: 50,height: 50)
+        Image(img)
+            .resizable()
             .frame(width: 50,height: 50)
     }
 }
 
-#Preview {
-    EnemyView()
-}
+//#Preview {
+//    EnemyView()
+//}

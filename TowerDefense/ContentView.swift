@@ -11,8 +11,9 @@ struct ContentView: View {
     @State var cellHeight: Double = 0
     @State var turnPoint: [(Double,Double)] = []
     @State var enemies: [Enemy] = [
-        Enemy(name: "XTY1", speed: 1, hp: 100, value: 25, position: (0, 0)),
-        AttackerEnemy(name: "XTY2", speed: 1.5, hp: 100, value: 25, position: (0, 0),attack: 5,range: 5)
+        Enemy(name: "XTY1", speed: 1, hp: 100, value: 25, position: (0, 0),img: "shield1"),
+        AttackerEnemy(name: "XTY2", speed: 1.5, hp: 100, value: 25, position: (0, 0),img: "shield2" ,attack: 5,range: 5),
+        Enemy(name: "XTY3", speed: 0.8, hp: 100, value: 25, position: (0, 0),img: "shield3"),
     ]
     
     var body: some View {
@@ -23,7 +24,7 @@ struct ContentView: View {
                 ZStack{
                     GridView(geometry: geometry, path: path)
                     ForEach(enemies){enemy in
-                        EnemyView()
+                        EnemyView(img: enemy.img)
                             .position(x: enemy.position.0, y: enemy.position.1)
                     }
                 }
@@ -74,7 +75,7 @@ struct ContentView: View {
         let distance = turnPoint[turnIndex - 1].0 == turnPoint[turnIndex].0 ?
                        abs(turnPoint[turnIndex - 1].1 - turnPoint[turnIndex].1) :
                        abs(turnPoint[turnIndex - 1].0 - turnPoint[turnIndex].0)
-        let duration: Double = Double(distance) / 100 / enemy.speed
+        let duration: Double = Double(distance) / 50 / enemy.speed
         withAnimation(.linear(duration: duration)) {
             enemy.position = turnPoint[turnIndex]
         }
