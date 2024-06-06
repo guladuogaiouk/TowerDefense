@@ -1,25 +1,74 @@
+
 import SwiftUI
 
 struct ContentView: View {
     let path: [(Int, Int)] = [
         (1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8),
-        (7, 7), (7, 6), (7, 5), (7, 4), (7, 3), (7, 2),
-        (8, 2), (9, 2), (10, 2), (11, 2), (12, 2), (13, 2), (14, 2), (15, 2)
+        (7, 7), (7, 6), (7, 5), (7, 4), (8, 4), (9, 4),
+        (9, 3), (9, 2), (10, 2), (11, 2), (12, 2), (13, 2), (14, 2), (15, 2)
     ]
+    @State var cellWidth: Double = 0
+    @State var cellHeight: Double = 0
+    @State var turnPoint: [(Double,Double)] = []
 
-    @State var enemies = [
-        Enemies(name: "XTY1", speed: 1, hp: 100, value: 25, position: (1,8)),
-        Enemies(name: "XTY2", speed: 1.5, hp: 100, value: 25, position: (1,8))
-    ]
+    @StateObject var enemy = Enemies(name: "XTY1", speed: 1, hp: 100, value: 25, position: (0, 0))
 
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 HeaderView(geometry: geometry)
                     .frame(height: geometry.size.height * 0.1)
-                GridView(geometry: geometry, path: path)
+                ZStack{
+                    GridView(geometry: geometry, path: path)
+                    EnemyView()
+                        .position(x: enemy.position.0, y: enemy.position.1)
+                }
+            }
+            .onAppear {
+                cellWidth = geometry.size.width / 15
+                cellHeight = geometry.size.height * 0.9 / 9
+                turnPoint = getTurnPoint(path: path)
+                enemy.position = turnPoint[0]
+                startGame()
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
+        }
+    }
+    
+    func getTurnPoint(path:[(Int,Int)]) -> [(Double,Double)]{
+        var turnPoint:[(Double,Double)] = []
+        for i in path.indices{
+            if (i == 0 || i == path.count - 1){
+                turnPoint.append(getRealPosition(position: path[i], cellHeight: cellHeight, cellWidth: cellWidth))
+            }else if((path[i-1].0 != path[i+1].0) && (path[i-1].1 != path[i+1].1)){
+                turnPoint.append(getRealPosition(position: path[i], cellHeight: cellHeight, cellWidth: cellWidth))
+            }
+        }
+        return turnPoint
+    }
+    
+    func getRealPosition(position: (Int, Int), cellHeight: Double, cellWidth: Double) -> (Double, Double) {
+        let real_x = Double(position.0) * cellWidth - cellWidth / 2
+        let real_y = Double(10 - position.1) * cellHeight - cellHeight / 2
+        return (real_x, real_y)
+    }
+    
+    func startGame(){
+        moveEnemies()
+    }
+    func moveEnemies() {
+        move(to: 1)
+    }
+    
+    func move(to turnIndex: Int) {
+        guard turnIndex < turnPoint.count else { return }
+        
+        withAnimation(.linear(duration: 2.0 / enemy.speed)) {
+            enemy.position = turnPoint[turnIndex]
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0 / enemy.speed) {
+            move(to: turnIndex + 1)
         }
     }
 }
@@ -40,21 +89,19 @@ struct HeaderView: View {
             .foregroundColor(Color(red: 112/255, green: 173/255, blue: 71/255))
             .frame(width: 140, height: 90, alignment: .center)
             .padding(10)
-//            .padding(.bottom, 10)
             .frame(maxHeight: .infinity)
 
             HStack {
                 ForEach(0..<12, id: \.self) { index in
                     Rectangle()
                         .fill(Color(red: 242/255, green: 242/255, blue: 242/255))
-                        .frame(width: geometry.size.width / 20,height: geometry.size.height * 0.094)
-//                        .frame(maxHeight: .infinity)
+                        .frame(width: geometry.size.width / 20, height: geometry.size.height * 0.094)
                         .border(Color(red: 166/255, green: 166/255, blue: 166/255))
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .padding(.bottom,20)
+        .padding(.bottom, 20)
         .frame(maxHeight: .infinity)
         .background(Color(red: 217/255, green: 217/255, blue: 217/255))
     }
@@ -81,7 +128,6 @@ struct GridView: View {
 struct CellView: View {
     var isPathCell: Bool
     var geometry: GeometryProxy
-
     var body: some View {
         Rectangle()
             .fill(isPathCell ? Color.white : Color(red: 242/255, green: 242/255, blue: 242/255))
@@ -92,9 +138,6 @@ struct CellView: View {
             )
     }
 }
-
-
-
 #Preview {
     ContentView()
 }

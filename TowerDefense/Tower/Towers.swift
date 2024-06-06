@@ -14,9 +14,9 @@ class Towers {
     var price: Int
     var cd: Int
     var level: Int
-    var position: (Int,Int)
+    var position: (Double,Double)
     
-    init(name: String, hp: Int, price: Int, cd: Int, level: Int, position: (Int,Int)) {
+    init(name: String, hp: Int, price: Int, cd: Int, level: Int, position: (Double,Double)) {
         self.id = UUID()
         self.name = name
         self.hp = hp
