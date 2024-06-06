@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct EnemyView: View {
+    
     var body: some View {
         Circle()
             .fill(Color.red)

@@ -10,9 +10,11 @@ struct ContentView: View {
     @State var cellWidth: Double = 0
     @State var cellHeight: Double = 0
     @State var turnPoint: [(Double,Double)] = []
-
-    @StateObject var enemy = Enemies(name: "XTY1", speed: 1, hp: 100, value: 25, position: (0, 0))
-
+    @State var enemies: [Enemy] = [
+        Enemy(name: "XTY1", speed: 1, hp: 100, value: 25, position: (0, 0)),
+        AttackerEnemy(name: "XTY2", speed: 1.5, hp: 100, value: 25, position: (0, 0),attack: 5,range: 5)
+    ]
+    
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
@@ -20,15 +22,20 @@ struct ContentView: View {
                     .frame(height: geometry.size.height * 0.1)
                 ZStack{
                     GridView(geometry: geometry, path: path)
-                    EnemyView()
-                        .position(x: enemy.position.0, y: enemy.position.1)
+                    ForEach(enemies){enemy in
+                        EnemyView()
+                            .position(x: enemy.position.0, y: enemy.position.1)
+                    }
                 }
             }
             .onAppear {
                 cellWidth = geometry.size.width / 15
                 cellHeight = geometry.size.height * 0.9 / 9
                 turnPoint = getTurnPoint(path: path)
-                enemy.position = turnPoint[0]
+                for i in enemies.indices{
+                    enemies[i].position = turnPoint[0]
+                }
+
                 startGame()
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
@@ -57,18 +64,22 @@ struct ContentView: View {
         moveEnemies()
     }
     func moveEnemies() {
-        move(to: 1)
+        for i in enemies.indices{
+            move(enemy:enemies[i],to: 1)
+        }
     }
     
-    func move(to turnIndex: Int) {
+    func move(enemy: Enemy, to turnIndex: Int) {
         guard turnIndex < turnPoint.count else { return }
-        
-        withAnimation(.linear(duration: 2.0 / enemy.speed)) {
+        let distance = turnPoint[turnIndex - 1].0 == turnPoint[turnIndex].0 ?
+                       abs(turnPoint[turnIndex - 1].1 - turnPoint[turnIndex].1) :
+                       abs(turnPoint[turnIndex - 1].0 - turnPoint[turnIndex].0)
+        let duration: Double = Double(distance) / 100 / enemy.speed
+        withAnimation(.linear(duration: duration)) {
             enemy.position = turnPoint[turnIndex]
         }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0 / enemy.speed) {
-            move(to: turnIndex + 1)
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            move(enemy: enemy, to: turnIndex + 1)
         }
     }
 }
@@ -141,3 +152,5 @@ struct CellView: View {
 #Preview {
     ContentView()
 }
+
+

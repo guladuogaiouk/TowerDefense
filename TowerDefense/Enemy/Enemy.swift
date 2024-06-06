@@ -8,13 +8,14 @@
 import Foundation
 import Combine
 
-class Enemies: ObservableObject,Identifiable{
+@Observable
+class Enemy: Identifiable{
     let id: UUID
     var name: String
     var speed: Double
     var hp: Int
     var value: Int
-    @Published var position: (Double,Double)
+    var position: (Double,Double)
     init(name: String, speed: Double, hp: Int, value: Int, position: (Double,Double)) {
         self.id = UUID()
         self.name = name
