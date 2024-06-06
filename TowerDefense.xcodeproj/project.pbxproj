@@ -7,18 +7,28 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		581DF9282C115DD6002A0E59 /* AttackerTower.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581DF9272C115DD6002A0E59 /* AttackerTower.swift */; };
+		581DF92B2C115EEC002A0E59 /* Bullets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581DF92A2C115EEC002A0E59 /* Bullets.swift */; };
+		581DF94D2C118E1C002A0E59 /* EnemyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581DF94C2C118E1C002A0E59 /* EnemyView.swift */; };
 		58D40ACF2C109F9D00DCF246 /* TowerDefenseApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D40ACE2C109F9D00DCF246 /* TowerDefenseApp.swift */; };
 		58D40AD12C109F9D00DCF246 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D40AD02C109F9D00DCF246 /* ContentView.swift */; };
 		58D40AD32C109F9F00DCF246 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 58D40AD22C109F9F00DCF246 /* Assets.xcassets */; };
 		58D40AD62C109F9F00DCF246 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 58D40AD52C109F9F00DCF246 /* Preview Assets.xcassets */; };
+		58D40ADD2C10A2C000DCF246 /* Enemies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D40ADC2C10A2C000DCF246 /* Enemies.swift */; };
+		58D40ADF2C10A2DA00DCF246 /* Towers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D40ADE2C10A2DA00DCF246 /* Towers.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		581DF9272C115DD6002A0E59 /* AttackerTower.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttackerTower.swift; sourceTree = "<group>"; };
+		581DF92A2C115EEC002A0E59 /* Bullets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bullets.swift; sourceTree = "<group>"; };
+		581DF94C2C118E1C002A0E59 /* EnemyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyView.swift; sourceTree = "<group>"; };
 		58D40ACB2C109F9D00DCF246 /* TowerDefense.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TowerDefense.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		58D40ACE2C109F9D00DCF246 /* TowerDefenseApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TowerDefenseApp.swift; sourceTree = "<group>"; };
 		58D40AD02C109F9D00DCF246 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		58D40AD22C109F9F00DCF246 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		58D40AD52C109F9F00DCF246 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		58D40ADC2C10A2C000DCF246 /* Enemies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enemies.swift; sourceTree = "<group>"; };
+		58D40ADE2C10A2DA00DCF246 /* Towers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Towers.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +42,40 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		581DF91E2C10AA08002A0E59 /* Enemy */ = {
+			isa = PBXGroup;
+			children = (
+				58D40ADC2C10A2C000DCF246 /* Enemies.swift */,
+				581DF94C2C118E1C002A0E59 /* EnemyView.swift */,
+			);
+			path = Enemy;
+			sourceTree = "<group>";
+		};
+		581DF91F2C10AA1F002A0E59 /* Tower */ = {
+			isa = PBXGroup;
+			children = (
+				581DF9262C115DBA002A0E59 /* Towertype */,
+				58D40ADE2C10A2DA00DCF246 /* Towers.swift */,
+			);
+			path = Tower;
+			sourceTree = "<group>";
+		};
+		581DF9262C115DBA002A0E59 /* Towertype */ = {
+			isa = PBXGroup;
+			children = (
+				581DF9272C115DD6002A0E59 /* AttackerTower.swift */,
+			);
+			path = Towertype;
+			sourceTree = "<group>";
+		};
+		581DF9292C115ED4002A0E59 /* Bullet */ = {
+			isa = PBXGroup;
+			children = (
+				581DF92A2C115EEC002A0E59 /* Bullets.swift */,
+			);
+			path = Bullet;
+			sourceTree = "<group>";
+		};
 		58D40AC22C109F9D00DCF246 = {
 			isa = PBXGroup;
 			children = (
@@ -51,6 +95,9 @@
 		58D40ACD2C109F9D00DCF246 /* TowerDefense */ = {
 			isa = PBXGroup;
 			children = (
+				581DF9292C115ED4002A0E59 /* Bullet */,
+				581DF91F2C10AA1F002A0E59 /* Tower */,
+				581DF91E2C10AA08002A0E59 /* Enemy */,
 				58D40ACE2C109F9D00DCF246 /* TowerDefenseApp.swift */,
 				58D40AD02C109F9D00DCF246 /* ContentView.swift */,
 				58D40AD22C109F9F00DCF246 /* Assets.xcassets */,
@@ -138,7 +185,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				58D40AD12C109F9D00DCF246 /* ContentView.swift in Sources */,
+				581DF94D2C118E1C002A0E59 /* EnemyView.swift in Sources */,
+				58D40ADD2C10A2C000DCF246 /* Enemies.swift in Sources */,
 				58D40ACF2C109F9D00DCF246 /* TowerDefenseApp.swift in Sources */,
+				581DF9282C115DD6002A0E59 /* AttackerTower.swift in Sources */,
+				58D40ADF2C10A2DA00DCF246 /* Towers.swift in Sources */,
+				581DF92B2C115EEC002A0E59 /* Bullets.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,8 +330,8 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -307,8 +359,8 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
