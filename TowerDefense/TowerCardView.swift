@@ -29,15 +29,16 @@ struct TowerCardView: View {
                 .fill(Color.black.opacity(0.3))
                 .frame(height: cellHeight * waitingRatio)
         }
+//        .onAppear(){
+//            startWaiting()
+//        }
         .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
-        .onAppear(){
-            startWaiting(cd: 8)
-        }
     }
-    func startWaiting(cd: Int){
-        waitingRatio = 1
-        withAnimation(.linear(duration:TimeInterval(cd))){
-            waitingRatio = 0
+    func startWaiting(){
+        print("startWaiting")
+//        waitingRatio = 1
+        withAnimation(.linear(duration:TimeInterval(tower.cd))){
+            waitingRatio = 1
         }
     }
 }

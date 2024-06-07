@@ -10,10 +10,12 @@ import SwiftUI
 @main
 struct TowerDefenseApp: App {
     @StateObject private var towerData = TowerData()
+    @StateObject private var towerCardViews = TowerCardViews()
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(towerData)
+                .environmentObject(towerCardViews)
         }
     }
 }

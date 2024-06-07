@@ -9,8 +9,8 @@ let path: [(Int, Int)] = [
 ]
 var towerCards: [Tower] = [
     AttackerTower(name: "attacker1", hp: 100, price: 150, cd: 5, level: 1, position: (0,0)),
-    AttackerTower(name: "attacker1", hp: 100, price: 50, cd: 5, level: 2, position: (0,0)),
-    AttackerTower(name: "attacker1", hp: 100, price: 200, cd: 5, level: 3, position: (0,0))
+    AttackerTower(name: "attacker1", hp: 100, price: 50, cd: 10, level: 2, position: (0,0)),
+    AttackerTower(name: "attacker1", hp: 100, price: 200, cd: 15, level: 3, position: (0,0))
 ]
 var turnPoint: [(Double,Double)] = []
 var coveredCells: [(Int,Int)] = []
@@ -26,7 +26,9 @@ class EnemyData: ObservableObject {
         BossAttackEnemy(name: "boss1", speed: 0.7, hp: 500, value: 100, position: (0, 0), level: 1)
     ]
 }
-
+class TowerCardViews: ObservableObject{
+    @Published var towerCardViews: [TowerCardView] = []
+}
 func getRealPosition(position: (Int, Int)) -> (Double, Double) {
     let real_x = Double(position.0) * cellWidth - cellWidth / 2
     let real_y = Double(10 - position.1) * cellHeight - cellHeight / 2
@@ -36,6 +38,7 @@ func getRealPosition(position: (Int, Int)) -> (Double, Double) {
 struct ContentView: View {
     @StateObject var enemyData = EnemyData()
     @EnvironmentObject var towerData: TowerData
+    @EnvironmentObject var towerCardViews: TowerCardViews
     @State var isCardClicked: Bool = false
     @State var selectedTower: Tower? = nil
     @State var money: Int = 500
@@ -79,6 +82,11 @@ struct ContentView: View {
         for i in path.indices{
             coveredCells.append(path[i])
         }
+        for tower in towerCards{
+            let towerCardView = TowerCardView(tower: tower)
+//            towerCardView.startWaiting()
+            towerCardViews.towerCardViews.append(towerCardView)
+        }
     }
     
     func getTurnPoint(path:[(Int,Int)]) -> [(Double,Double)]{
@@ -121,6 +129,7 @@ struct HeaderView: View {
     @Binding var isCardClicked: Bool
     @Binding var selectedTower: Tower?
     @Binding var money: Int
+    @EnvironmentObject var towerCardViews: TowerCardViews
     func clickTowerCard(tower: Tower){
         if selectedTower != nil{
             if selectedTower == tower{
@@ -152,33 +161,31 @@ struct HeaderView: View {
 
             HStack {
                 ForEach(0..<12, id: \.self) { index in
-                    if index < towerCards.count{
-                        let tower = towerCards[index]
-                        TowerCardView(tower: tower)
+                    if index < towerCardViews.towerCardViews.count{
+                        let towerCardView = towerCardViews.towerCardViews[index]
+                        let tower = towerCardView.tower
+                        towerCardView
                             .background(Color(red: 190/255, green: 190/255, blue: 190/255))
-                            
-                            .overlay{
-                                if(isCardClicked){
-                                    if(selectedTower != tower){
-//                                        Rectangle()
-//                                            .fill(Color.black.opacity(0.4))
-//                                            .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
-                                    }else{
+                            .overlay(
+                                Group {
+                                    if isCardClicked && selectedTower == tower {
                                         Rectangle()
-                                            .stroke(Color.yellow.opacity(0.5),lineWidth: 5)
+                                            .stroke(Color.yellow.opacity(0.5), lineWidth: 5)
                                     }
                                 }
-                            }
+                            )
                             .onTapGesture {
                                 clickTowerCard(tower: tower)
                             }
-                            .overlay{
-                                if(money < tower.price){
-                                    Rectangle()
-                                        .fill(Color.black.opacity(0.6))
-                                        .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
+                            .overlay(
+                                Group {
+                                    if money < tower.price {
+                                        Rectangle()
+                                            .fill(Color.black.opacity(0.6))
+                                            .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
+                                    }
                                 }
-                            }
+                            )
                     }else{
                         Rectangle()
                             .fill(Color(red: 242/255, green: 242/255, blue: 242/255))
@@ -219,6 +226,7 @@ struct CellView: View {
     @Binding var selectedTower: Tower?
     @Binding var money: Int
     @EnvironmentObject var towerData: TowerData
+    @EnvironmentObject var towerCardViews: TowerCardViews
     var position: (Int,Int)
     var isPathCell: Bool
     var body: some View {
@@ -234,16 +242,23 @@ struct CellView: View {
             )
             .onTapGesture {
                 if(isCardClicked && !coveredCells.contains(where: { $0 == position})){
-                    if let selectedTower = selectedTower {
-                        let newTower = selectedTower.createCopy(at: position)
-                        money -= newTower.price
-                        towerData.towers.append(newTower)
-                        coveredCells.append(position)
-                        isCardClicked = false
-                    }
-                    
+                    layoutTower()
                 }
             }
+    }
+    func layoutTower(){
+        if let selectedTower = selectedTower {
+            let newTower = selectedTower.createCopy(at: position)
+            money -= newTower.price
+            towerData.towers.append(newTower)
+            coveredCells.append(position)
+            isCardClicked = false
+            for towercard in towerCardViews.towerCardViews{
+                if(towercard.tower == selectedTower){
+                    towercard.startWaiting()
+                }
+            }
+        }
     }
 }
 #Preview {
