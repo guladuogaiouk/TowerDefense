@@ -8,17 +8,14 @@
 import SwiftUI
 
 struct EnemyView: View {
-    var img: String
+    var enemy: Enemy
+    private var width: Double {
+        return enemy.name.starts(with: "shield") ? ScreenSize.cellScale * 0.7 : ScreenSize.cellScale * 1.1
+    }
     var body: some View {
-//        Circle()
-//            .fill(Color.red)
-//            .frame(width: 50,height: 50)
-        Image(img)
+        Image(enemy.img)
             .resizable()
-            .frame(width: 50,height: 50)
+            .aspectRatio(contentMode: .fit)
+            .frame(width: width)
     }
 }
-
-//#Preview {
-//    EnemyView()
-//}

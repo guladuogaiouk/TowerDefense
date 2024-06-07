@@ -7,10 +7,9 @@
 
 import Foundation
 class AttackerTower: Tower {
-    var range: Int
-    
-    init(name: String, hp: Int, price: Int, cd: Int, level: Int, position: (Double,Double),img: String, range:  Int) {
-        self.range = range
+    var range: Int = 3
+    init(name: String, hp: Int, price: Int, cd: Int, level: Int, position: (Double,Double)) {
+        let img =  "\(name).\(level)"
         super.init(name: name, hp: hp, price: price, cd: cd, level: level, position: position,img: img)
     }
 }

@@ -16,18 +16,13 @@ struct TowerCardView: View {
                 .aspectRatio(contentMode: .fit)
                 
             HStack {
-//                Image(systemName: "cross.fill")
-//                    .font(.caption)
                 Text("\(tower.price)")
                     .font(.headline)
 //                    .padding(3)
                     .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/)
+                    .foregroundStyle(Color.black)
             }
-//            .background(Color(red: 217/255, green: 217/255, blue: 217/255))
         }
     }
 }
-//
-//#Preview {
-//    TowerCardView()
-//}
+

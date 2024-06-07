@@ -10,23 +10,25 @@ let path: [(Int, Int)] = [
     (9, 3), (9, 2), (10, 2), (11, 2), (12, 2), (13, 2), (14, 2), (15, 2)
 ]
 var towerCards: [Tower] = [
-    Tower(name: "tower1", hp: 100, price: 150, cd: 5, level: 1, position: (0,0), img: "shield1"),
-    Tower(name: "tower2", hp: 100, price: 100, cd: 5, level: 1, position: (0,0), img: "shield2"),
-    Tower(name: "tower3", hp: 100, price: 50, cd: 5, level: 1, position: (0,0), img: "shield3"),
-    Tower(name: "tower4", hp: 100, price: 200, cd: 5, level: 1, position: (0,0), img: "shield1")
+    AttackerTower(name: "attacker1", hp: 100, price: 150, cd: 5, level: 1, position: (0,0)),
+    AttackerTower(name: "attacker1", hp: 100, price: 50, cd: 5, level: 2, position: (0,0)),
+    AttackerTower(name: "attacker1", hp: 100, price: 200, cd: 5, level: 3, position: (0,0))
 ]
+var turnPoint: [(Double,Double)] = []
+
 class TowerData: ObservableObject{
     @Published var towers: [Tower] = [
-        Tower(name: "tower1", hp: 100, price: 150, cd: 5, level: 1, position: (6,7), img: "shield1"),
-        Tower(name: "tower2", hp: 100, price: 100, cd: 5, level: 1, position: (8,8), img: "shield2"),
-        Tower(name: "tower3", hp: 100, price: 50, cd: 5, level: 1, position: (7,9), img: "shield3")
+        AttackerTower(name: "attacker1", hp: 100, price: 150, cd: 5, level: 1, position: (6,7)),
+        AttackerTower(name: "attacker1", hp: 100, price: 100, cd: 5, level: 2, position: (8,8)),
+        AttackerTower(name: "attacker1", hp: 100, price: 50, cd: 5, level: 3, position: (7,9))
     ]
 }
 class EnemyData: ObservableObject {
     @Published var enemies: [Enemy] = [
-        Enemy(name: "XTY1", speed: 1, hp: 100, value: 25, position: (0, 0), img: "shield1"),
-        AttackerEnemy(name: "XTY2", speed: 1.5, hp: 100, value: 25, position: (0, 0), img: "shield2", attack: 5, range: 5),
-        Enemy(name: "XTY3", speed: 0.8, hp: 100, value: 25, position: (0, 0), img: "shield3"),
+        AttackerEnemy(name: "shield1", speed: 1, hp: 100, value: 25, position: (0, 0), level: 1),
+        AttackerEnemy(name: "shield1", speed: 0.8, hp: 100, value: 25, position: (0, 0), level: 2),
+        AttackerEnemy(name: "shield1", speed: 1.2, hp: 100, value: 25, position: (0, 0), level: 3),
+        BossAttackEnemy(name: "boss1", speed: 0.7, hp: 500, value: 100, position: (0, 0), level: 1)
     ]
 }
 //func getRealDistance(distance: Int)->Double{
@@ -39,28 +41,24 @@ func getRealPosition(position: (Int, Int)) -> (Double, Double) {
 }
 
 struct ContentView: View {
-//    var cellWidth_: Double
-//    var cellHeight_: Double
     @EnvironmentObject var screenSize: ScreenSize
-    @State var turnPoint: [(Double,Double)] = []
     @StateObject var enemyData = EnemyData()
     @StateObject var towerData = TowerData()
     
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                HeaderView(geometry: geometry)
+                HeaderView()
                     .frame(height: cellHeight * 1.0)
                 ZStack{
-                    GridView(geometry: geometry, path: path)
+                    GridView(path: path)
                     ForEach(enemyData.enemies){enemy in
-                        EnemyView(img: enemy.img)
+                        EnemyView(enemy: enemy)
                             .position(x: enemy.position.0, y: enemy.position.1)
                     }
                     ForEach(towerData.towers){ tower in
-                        Rectangle()
-                            .fill(Color.blue)
-                            .frame(width: 40,height: 40)
+                        TowerView(tower: tower)
+                            .frame(width: cellWidth * 0.8)
                             .position(x: tower.position.0, y: tower.position.1)
                     }
                 }
@@ -121,7 +119,6 @@ struct ContentView: View {
 }
 
 struct HeaderView: View {
-    var geometry: GeometryProxy
     var body: some View {
         HStack {
             HStack {
@@ -153,9 +150,7 @@ struct HeaderView: View {
                     
                 }
             }
-//            .padding(.bottom,20)
             .frame(maxWidth: .infinity, alignment: .leading)
-            
         }
         .padding(.bottom, 30)
         .frame(maxHeight: .infinity)
@@ -164,16 +159,14 @@ struct HeaderView: View {
 }
 
 struct GridView: View {
-    var geometry: GeometryProxy
     var path: [(Int, Int)]
-
     var body: some View {
         VStack(spacing: 0) {
             ForEach(0..<9, id: \.self) { row in
                 HStack(spacing: 0) {
                     ForEach(0..<15, id: \.self) { column in
                         let isPathCell = path.contains(where: { $0 == (column + 1, 9 - row) })
-                        CellView(isPathCell: isPathCell, geometry: geometry)
+                        CellView(isPathCell: isPathCell)
                     }
                 }
             }
@@ -183,7 +176,6 @@ struct GridView: View {
 
 struct CellView: View {
     var isPathCell: Bool
-    var geometry: GeometryProxy
     var body: some View {
         Rectangle()
             .fill(isPathCell ? Color.white : Color(red: 242/255, green: 242/255, blue: 242/255))

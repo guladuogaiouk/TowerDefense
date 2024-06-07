@@ -17,7 +17,8 @@ class Enemy: Identifiable{
     var value: Int
     var position: (Double,Double)
     var img: String
-    init(name: String, speed: Double, hp: Int, value: Int, position: (Double,Double), img: String) {
+    var level: Int
+    init(name: String, speed: Double, hp: Int, value: Int, position: (Double,Double), img: String, level: Int) {
         self.id = UUID()
         self.name = name
         self.speed = speed
@@ -25,5 +26,6 @@ class Enemy: Identifiable{
         self.value = value
         self.position = position
         self.img = img
+        self.level = level
     }
 }
