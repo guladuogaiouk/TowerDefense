@@ -71,23 +71,25 @@ struct ContentView: View {
         }
     }
     
-    func initVariables(){
+    func initVariables() {
         turnPoint = getTurnPoint(path: path)
-        for i in enemyData.enemies.indices{
+        for i in enemyData.enemies.indices {
             enemyData.enemies[i].position = turnPoint[0]
         }
-        for i in towerData.towers.indices{
-            towerData.towers[i].position = getRealPosition(position: (Int(towerData.towers[i].position.0),Int(towerData.towers[i].position.1)))
+        for i in towerData.towers.indices {
+            towerData.towers[i].position = getRealPosition(position: (Int(towerData.towers[i].position.0), Int(towerData.towers[i].position.1)))
         }
-        for i in path.indices{
+        for i in path.indices {
             coveredCells.append(path[i])
         }
-        for tower in towerCards{
-            let towerCardView = TowerCardView(tower: tower)
-//            towerCardView.startWaiting()
+        for tower in towerCards {
+            let viewModel = TowerCardViewModel(tower: tower)
+            let towerCardView = TowerCardView(viewModel: viewModel)
+            viewModel.startWaiting()
             towerCardViews.towerCardViews.append(towerCardView)
         }
     }
+
     
     func getTurnPoint(path:[(Int,Int)]) -> [(Double,Double)]{
         var turnPoint:[(Double,Double)] = []
@@ -163,7 +165,7 @@ struct HeaderView: View {
                 ForEach(0..<12, id: \.self) { index in
                     if index < towerCardViews.towerCardViews.count{
                         let towerCardView = towerCardViews.towerCardViews[index]
-                        let tower = towerCardView.tower
+                        let tower = towerCardView.viewModel.tower
                         towerCardView
                             .background(Color(red: 190/255, green: 190/255, blue: 190/255))
                             .overlay(
@@ -175,7 +177,10 @@ struct HeaderView: View {
                                 }
                             )
                             .onTapGesture {
-                                clickTowerCard(tower: tower)
+                                if(!towerCardView.viewModel.isCoolingDown){
+                                    clickTowerCard(tower: tower)
+                                }
+                                
                             }
                             .overlay(
                                 Group {
@@ -231,7 +236,7 @@ struct CellView: View {
     var isPathCell: Bool
     var body: some View {
         Rectangle()
-            .fill(isPathCell ? Color.white : 
+            .fill(isPathCell ? Color.white :
                   !isCardClicked ? Color(red: 242/255, green: 242/255, blue: 242/255)
                   : coveredCells.contains(where: { $0 == position}) ? Color(red: 242/255, green: 242/255, blue: 242/255)
                   : Color(red: 150/255, green: 150/255, blue: 150/255))
@@ -254,8 +259,8 @@ struct CellView: View {
             coveredCells.append(position)
             isCardClicked = false
             for towercard in towerCardViews.towerCardViews{
-                if(towercard.tower == selectedTower){
-                    towercard.startWaiting()
+                if(towercard.viewModel.tower == selectedTower){
+                    towercard.viewModel.startWaiting()
                 }
             }
         }
@@ -264,5 +269,3 @@ struct CellView: View {
 #Preview {
     ContentView()
 }
-
-
