@@ -31,9 +31,7 @@ class EnemyData: ObservableObject {
         BossAttackEnemy(name: "boss1", speed: 0.7, hp: 500, value: 100, position: (0, 0), level: 1)
     ]
 }
-//func getRealDistance(distance: Int)->Double{
-//    
-//}
+
 func getRealPosition(position: (Int, Int)) -> (Double, Double) {
     let real_x = Double(position.0) * cellWidth - cellWidth / 2
     let real_y = Double(10 - position.1) * cellHeight - cellHeight / 2
@@ -41,7 +39,6 @@ func getRealPosition(position: (Int, Int)) -> (Double, Double) {
 }
 
 struct ContentView: View {
-    @EnvironmentObject var screenSize: ScreenSize
     @StateObject var enemyData = EnemyData()
     @StateObject var towerData = TowerData()
     
@@ -92,8 +89,6 @@ struct ContentView: View {
         return turnPoint
     }
     
-    
-    
     func startGame(){
         moveEnemies()
     }
@@ -117,7 +112,9 @@ struct ContentView: View {
         }
     }
 }
-
+func clickTowerCard(tower: Tower){
+    print(tower.name," clicked")
+}
 struct HeaderView: View {
     var body: some View {
         HStack {
@@ -142,6 +139,9 @@ struct HeaderView: View {
                             .padding(10)
                             .background(Color(red: 190/255, green: 190/255, blue: 190/255))
                             .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
+                            .onTapGesture {
+                                clickTowerCard(tower: towerCards[index])
+                            }
                     }else{
                         Rectangle()
                             .fill(Color(red: 242/255, green: 242/255, blue: 242/255))
