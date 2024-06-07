@@ -8,7 +8,11 @@
 import Foundation
 
 @Observable
-class Tower: Identifiable {
+class Tower: Identifiable,Equatable {
+    static func == (lhs: Tower, rhs: Tower) -> Bool {
+        return (lhs.name == rhs.name && lhs.level == rhs.level)
+    }
+    
     let id: UUID
     var name: String
     var hp: Int

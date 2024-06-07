@@ -1,6 +1,4 @@
-
 import SwiftUI
-
 var cellWidth: Double = ScreenSize.cellScale
 var cellHeight: Double = ScreenSize.cellScale
 
@@ -15,6 +13,7 @@ var towerCards: [Tower] = [
     AttackerTower(name: "attacker1", hp: 100, price: 200, cd: 5, level: 3, position: (0,0))
 ]
 var turnPoint: [(Double,Double)] = []
+var coveredCells: [(Int,Int)] = [(12,3)]
 
 class TowerData: ObservableObject{
     @Published var towers: [Tower] = [
@@ -41,14 +40,15 @@ func getRealPosition(position: (Int, Int)) -> (Double, Double) {
 struct ContentView: View {
     @StateObject var enemyData = EnemyData()
     @StateObject var towerData = TowerData()
-    
+    @State var isCardClicked: Bool = false
+    @State var selectedTower: Tower? = nil
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                HeaderView()
+                HeaderView(isCardClicked: $isCardClicked,selectedTower: $selectedTower)
                     .frame(height: cellHeight * 1.0)
                 ZStack{
-                    GridView(path: path)
+                    GridView(isCardClicked: $isCardClicked, path: path)
                     ForEach(enemyData.enemies){enemy in
                         EnemyView(enemy: enemy)
                             .position(x: enemy.position.0, y: enemy.position.1)
@@ -64,16 +64,23 @@ struct ContentView: View {
             .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/,maxHeight: .infinity)
             .background(Color(red: 242/255, green: 242/255, blue: 242/255))
             .onAppear {
-                turnPoint = getTurnPoint(path: path)
-                for i in enemyData.enemies.indices{
-                    enemyData.enemies[i].position = turnPoint[0]
-                }
-                for i in towerData.towers.indices{
-                    towerData.towers[i].position = getRealPosition(position: (Int(towerData.towers[i].position.0),Int(towerData.towers[i].position.1)))
-                }
+                initVariables()
                 startGame()
             }
             .frame(width: ScreenSize.width, height: ScreenSize.height)
+        }
+    }
+    
+    func initVariables(){
+        turnPoint = getTurnPoint(path: path)
+        for i in enemyData.enemies.indices{
+            enemyData.enemies[i].position = turnPoint[0]
+        }
+        for i in towerData.towers.indices{
+            towerData.towers[i].position = getRealPosition(position: (Int(towerData.towers[i].position.0),Int(towerData.towers[i].position.1)))
+        }
+        for i in path.indices{
+            coveredCells.append(path[i])
         }
     }
     
@@ -112,10 +119,23 @@ struct ContentView: View {
         }
     }
 }
-func clickTowerCard(tower: Tower){
-    print(tower.name," clicked")
-}
+
 struct HeaderView: View {
+    @Binding var isCardClicked: Bool
+    @Binding var selectedTower: Tower?
+    func clickTowerCard(tower: Tower){
+        if selectedTower != nil{
+            if selectedTower == tower{
+                isCardClicked.toggle()
+            }else{
+                selectedTower = tower
+                isCardClicked = true
+            }
+        }else{
+            isCardClicked = true
+            selectedTower = tower
+        }
+    }
     var body: some View {
         HStack {
             HStack {
@@ -135,12 +155,25 @@ struct HeaderView: View {
             HStack {
                 ForEach(0..<12, id: \.self) { index in
                     if index < towerCards.count{
-                        TowerCardView(tower: towerCards[index])
+                        let tower = towerCards[index]
+                        TowerCardView(tower: tower)
                             .padding(10)
                             .background(Color(red: 190/255, green: 190/255, blue: 190/255))
                             .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
+                            .overlay{
+                                if(isCardClicked){
+                                    if(selectedTower != tower){
+                                        Rectangle()
+                                            .fill(Color.black.opacity(0.4))
+                                            .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
+                                    }else{
+                                        Rectangle()
+                                            .stroke(Color.yellow.opacity(0.5),lineWidth: 5)
+                                    }
+                                }
+                            }
                             .onTapGesture {
-                                clickTowerCard(tower: towerCards[index])
+                                clickTowerCard(tower: tower)
                             }
                     }else{
                         Rectangle()
@@ -159,6 +192,7 @@ struct HeaderView: View {
 }
 
 struct GridView: View {
+    @Binding var isCardClicked: Bool
     var path: [(Int, Int)]
     var body: some View {
         VStack(spacing: 0) {
@@ -166,7 +200,7 @@ struct GridView: View {
                 HStack(spacing: 0) {
                     ForEach(0..<15, id: \.self) { column in
                         let isPathCell = path.contains(where: { $0 == (column + 1, 9 - row) })
-                        CellView(isPathCell: isPathCell)
+                        CellView(isCardClicked: $isCardClicked, position: (column + 1, 9 - row), isPathCell: isPathCell)
                     }
                 }
             }
@@ -175,10 +209,15 @@ struct GridView: View {
 }
 
 struct CellView: View {
+    @Binding var isCardClicked: Bool
+    var position: (Int,Int)
     var isPathCell: Bool
     var body: some View {
         Rectangle()
-            .fill(isPathCell ? Color.white : Color(red: 242/255, green: 242/255, blue: 242/255))
+            .fill(isPathCell ? Color.white : 
+                  !isCardClicked ? Color(red: 242/255, green: 242/255, blue: 242/255)
+                  : coveredCells.contains(where: { $0 == position}) ? Color(red: 242/255, green: 242/255, blue: 242/255)
+                  : Color(red: 150/255, green: 150/255, blue: 150/255))
             .frame(width: cellWidth * 1.0, height: cellHeight * 1.0)
             .overlay(
                 isPathCell ? nil : Rectangle()
