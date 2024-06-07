@@ -155,15 +155,14 @@ struct HeaderView: View {
                     if index < towerCards.count{
                         let tower = towerCards[index]
                         TowerCardView(tower: tower)
-                            .padding(10)
                             .background(Color(red: 190/255, green: 190/255, blue: 190/255))
-                            .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
+                            
                             .overlay{
                                 if(isCardClicked){
                                     if(selectedTower != tower){
-                                        Rectangle()
-                                            .fill(Color.black.opacity(0.4))
-                                            .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
+//                                        Rectangle()
+//                                            .fill(Color.black.opacity(0.4))
+//                                            .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
                                     }else{
                                         Rectangle()
                                             .stroke(Color.yellow.opacity(0.5),lineWidth: 5)
@@ -172,6 +171,13 @@ struct HeaderView: View {
                             }
                             .onTapGesture {
                                 clickTowerCard(tower: tower)
+                            }
+                            .overlay{
+                                if(money < tower.price){
+                                    Rectangle()
+                                        .fill(Color.black.opacity(0.6))
+                                        .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
+                                }
                             }
                     }else{
                         Rectangle()
