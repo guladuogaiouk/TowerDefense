@@ -9,21 +9,14 @@ import SwiftUI
 
 @main
 struct TowerDefenseApp: App {
+    @StateObject private var towerData = TowerData()
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(towerData)
         }
     }
 }
-//func getCellScale() -> Double{
-//    let screenBounds = UIScreen.main.bounds
-//    let width = screenBounds.width
-//    let height = screenBounds.height
-//    let cellWidth = width / 15
-//    let cellHeight = height * 0.9 / 9
-//    return cellWidth < cellHeight ? cellWidth : cellHeight
-//}
-
 
 class ScreenSize: ObservableObject {
     static let shared = ScreenSize()

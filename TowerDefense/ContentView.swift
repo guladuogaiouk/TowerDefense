@@ -13,14 +13,10 @@ var towerCards: [Tower] = [
     AttackerTower(name: "attacker1", hp: 100, price: 200, cd: 5, level: 3, position: (0,0))
 ]
 var turnPoint: [(Double,Double)] = []
-var coveredCells: [(Int,Int)] = [(12,3)]
+var coveredCells: [(Int,Int)] = []
 
 class TowerData: ObservableObject{
-    @Published var towers: [Tower] = [
-        AttackerTower(name: "attacker1", hp: 100, price: 150, cd: 5, level: 1, position: (6,7)),
-        AttackerTower(name: "attacker1", hp: 100, price: 100, cd: 5, level: 2, position: (8,8)),
-        AttackerTower(name: "attacker1", hp: 100, price: 50, cd: 5, level: 3, position: (7,9))
-    ]
+    @Published var towers: [Tower] = []
 }
 class EnemyData: ObservableObject {
     @Published var enemies: [Enemy] = [
@@ -39,16 +35,17 @@ func getRealPosition(position: (Int, Int)) -> (Double, Double) {
 
 struct ContentView: View {
     @StateObject var enemyData = EnemyData()
-    @StateObject var towerData = TowerData()
+    @EnvironmentObject var towerData: TowerData
     @State var isCardClicked: Bool = false
     @State var selectedTower: Tower? = nil
+    @State var money: Int = 500
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                HeaderView(isCardClicked: $isCardClicked,selectedTower: $selectedTower)
+                HeaderView(isCardClicked: $isCardClicked,selectedTower: $selectedTower,money: $money)
                     .frame(height: cellHeight * 1.0)
                 ZStack{
-                    GridView(isCardClicked: $isCardClicked, path: path)
+                    GridView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, path: path)
                     ForEach(enemyData.enemies){enemy in
                         EnemyView(enemy: enemy)
                             .position(x: enemy.position.0, y: enemy.position.1)
@@ -123,6 +120,7 @@ struct ContentView: View {
 struct HeaderView: View {
     @Binding var isCardClicked: Bool
     @Binding var selectedTower: Tower?
+    @Binding var money: Int
     func clickTowerCard(tower: Tower){
         if selectedTower != nil{
             if selectedTower == tower{
@@ -143,7 +141,7 @@ struct HeaderView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 30, height: 30)
-                Text("500")
+                Text("\(money)")
                     .font(.title)
                     .fontWeight(.bold)
             }
@@ -193,6 +191,8 @@ struct HeaderView: View {
 
 struct GridView: View {
     @Binding var isCardClicked: Bool
+    @Binding var selectedTower: Tower?
+    @Binding var money: Int
     var path: [(Int, Int)]
     var body: some View {
         VStack(spacing: 0) {
@@ -200,7 +200,7 @@ struct GridView: View {
                 HStack(spacing: 0) {
                     ForEach(0..<15, id: \.self) { column in
                         let isPathCell = path.contains(where: { $0 == (column + 1, 9 - row) })
-                        CellView(isCardClicked: $isCardClicked, position: (column + 1, 9 - row), isPathCell: isPathCell)
+                        CellView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, position: (column + 1, 9 - row), isPathCell: isPathCell)
                     }
                 }
             }
@@ -210,6 +210,9 @@ struct GridView: View {
 
 struct CellView: View {
     @Binding var isCardClicked: Bool
+    @Binding var selectedTower: Tower?
+    @Binding var money: Int
+    @EnvironmentObject var towerData: TowerData
     var position: (Int,Int)
     var isPathCell: Bool
     var body: some View {
@@ -223,6 +226,18 @@ struct CellView: View {
                 isPathCell ? nil : Rectangle()
                     .stroke(Color(red: 217/255, green: 217/255, blue: 217/255), lineWidth: 1)
             )
+            .onTapGesture {
+                if(isCardClicked && !coveredCells.contains(where: { $0 == position})){
+                    if let selectedTower = selectedTower {
+                        let newTower = selectedTower.createCopy(at: position)
+                        money -= newTower.price
+                        towerData.towers.append(newTower)
+                        coveredCells.append(position)
+                        isCardClicked = false
+                    }
+                    
+                }
+            }
     }
 }
 #Preview {

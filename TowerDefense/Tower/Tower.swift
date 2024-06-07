@@ -32,6 +32,10 @@ class Tower: Identifiable,Equatable {
         self.position = position
         self.img = img
     }
+    
+    func createCopy(at position: (Int, Int)) -> Tower {
+        return Tower(name: self.name, hp: self.hp, price: self.price, cd: self.cd, level: self.level, position: getRealPosition(position: position), img: self.img)
+    }
 }
 
 
