@@ -6,11 +6,11 @@
 //
 
 import Foundation
-class AttackerTower: Towers {
+class AttackerTower: Tower {
     var range: Int
     
-    init(name: String, hp: Int, price: Int, cd: Int, level: Int, position: (Double,Double), range:  Int) {
+    init(name: String, hp: Int, price: Int, cd: Int, level: Int, position: (Double,Double),img: String, range:  Int) {
         self.range = range
-        super.init(name: name, hp: hp, price: price, cd: cd, level: level, position: position)
+        super.init(name: name, hp: hp, price: price, cd: cd, level: level, position: position,img: img)
     }
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		581421032C12869600B67BA9 /* TowerCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581421022C12869500B67BA9 /* TowerCardView.swift */; };
 		581DF9282C115DD6002A0E59 /* AttackerTower.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581DF9272C115DD6002A0E59 /* AttackerTower.swift */; };
 		581DF92B2C115EEC002A0E59 /* Bullets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581DF92A2C115EEC002A0E59 /* Bullets.swift */; };
 		581DF94D2C118E1C002A0E59 /* EnemyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581DF94C2C118E1C002A0E59 /* EnemyView.swift */; };
@@ -16,10 +17,11 @@
 		58D40AD32C109F9F00DCF246 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 58D40AD22C109F9F00DCF246 /* Assets.xcassets */; };
 		58D40AD62C109F9F00DCF246 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 58D40AD52C109F9F00DCF246 /* Preview Assets.xcassets */; };
 		58D40ADD2C10A2C000DCF246 /* Enemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D40ADC2C10A2C000DCF246 /* Enemy.swift */; };
-		58D40ADF2C10A2DA00DCF246 /* Towers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D40ADE2C10A2DA00DCF246 /* Towers.swift */; };
+		58D40ADF2C10A2DA00DCF246 /* Tower.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D40ADE2C10A2DA00DCF246 /* Tower.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		581421022C12869500B67BA9 /* TowerCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TowerCardView.swift; sourceTree = "<group>"; };
 		581DF9272C115DD6002A0E59 /* AttackerTower.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttackerTower.swift; sourceTree = "<group>"; };
 		581DF92A2C115EEC002A0E59 /* Bullets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bullets.swift; sourceTree = "<group>"; };
 		581DF94C2C118E1C002A0E59 /* EnemyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyView.swift; sourceTree = "<group>"; };
@@ -30,7 +32,7 @@
 		58D40AD22C109F9F00DCF246 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		58D40AD52C109F9F00DCF246 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		58D40ADC2C10A2C000DCF246 /* Enemy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Enemy.swift; sourceTree = "<group>"; };
-		58D40ADE2C10A2DA00DCF246 /* Towers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Towers.swift; sourceTree = "<group>"; };
+		58D40ADE2C10A2DA00DCF246 /* Tower.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tower.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,7 +60,7 @@
 			isa = PBXGroup;
 			children = (
 				581DF9262C115DBA002A0E59 /* Towertype */,
-				58D40ADE2C10A2DA00DCF246 /* Towers.swift */,
+				58D40ADE2C10A2DA00DCF246 /* Tower.swift */,
 			);
 			path = Tower;
 			sourceTree = "<group>";
@@ -113,6 +115,7 @@
 				58D40AD02C109F9D00DCF246 /* ContentView.swift */,
 				58D40AD22C109F9F00DCF246 /* Assets.xcassets */,
 				58D40AD42C109F9F00DCF246 /* Preview Content */,
+				581421022C12869500B67BA9 /* TowerCardView.swift */,
 			);
 			path = TowerDefense;
 			sourceTree = "<group>";
@@ -195,12 +198,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				581421032C12869600B67BA9 /* TowerCardView.swift in Sources */,
 				58D40AD12C109F9D00DCF246 /* ContentView.swift in Sources */,
 				581DF94D2C118E1C002A0E59 /* EnemyView.swift in Sources */,
 				58D40ADD2C10A2C000DCF246 /* Enemy.swift in Sources */,
 				58D40ACF2C109F9D00DCF246 /* TowerDefenseApp.swift in Sources */,
 				581DF9282C115DD6002A0E59 /* AttackerTower.swift in Sources */,
-				58D40ADF2C10A2DA00DCF246 /* Towers.swift in Sources */,
+				58D40ADF2C10A2DA00DCF246 /* Tower.swift in Sources */,
 				581DF92B2C115EEC002A0E59 /* Bullets.swift in Sources */,
 				581DF9542C11FA83002A0E59 /* BossEnemy.swift in Sources */,
 			);
