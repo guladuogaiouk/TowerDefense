@@ -9,7 +9,11 @@ import Foundation
 import Combine
 
 @Observable
-class Enemy: Identifiable{
+class Enemy: Identifiable,Equatable{
+    static func == (lhs: Enemy, rhs: Enemy) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
     let id: UUID
     var name: String
     var speed: Double

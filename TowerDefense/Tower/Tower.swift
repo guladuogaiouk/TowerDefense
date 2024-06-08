@@ -15,9 +15,15 @@ class Tower: Identifiable,Equatable {
     
     let id: UUID
     var name: String
-    var hp: Int
-    var price: Int
-    var cd: Int
+    var hp: Int{
+        return 100
+    }
+    var price: Int{
+        return 100
+    }
+    var cd: Int{
+        return 10
+    }
     var level: Int
     var costToNextLevel: Int{
         switch(level){
@@ -32,18 +38,15 @@ class Tower: Identifiable,Equatable {
         return "\(name).\(level)"
     }
     
-    init(name: String, hp: Int, price: Int, cd: Int, level: Int, position: (Int,Int)) {
+    init(name: String, level: Int, position: (Int,Int)) {
         self.id = UUID()
         self.name = name
-        self.hp = hp
-        self.price = price
-        self.cd = cd
         self.level = level
         self.position = position
     }
     
     func createCopy(at position: (Int, Int)) -> Tower {
-        return Tower(name: self.name, hp: self.hp, price: self.price, cd: self.cd, level: self.level, position: position)
+        return Tower(name: self.name, level: self.level, position: position)
     }
 }
 

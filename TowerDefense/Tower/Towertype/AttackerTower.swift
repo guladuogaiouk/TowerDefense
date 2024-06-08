@@ -7,11 +7,13 @@
 
 import Foundation
 class AttackerTower: Tower {
-    var range: Int = 3
-    override init(name: String, hp: Int, price: Int, cd: Int, level: Int, position: (Int,Int)) {
-        super.init(name: name, hp: hp, price: price, cd: cd, level: level, position: position)
+    var range: Int{
+        return 3
+    }
+    override init(name: String, level: Int, position: (Int,Int)) {
+        super.init(name: name, level: level, position: position)
     }
     override func createCopy(at position: (Int, Int)) -> AttackerTower {
-        return AttackerTower(name: self.name, hp: self.hp, price: self.price, cd: self.cd, level: self.level, position: position)
+        return AttackerTower(name: self.name, level: self.level, position: position)
     }
 }

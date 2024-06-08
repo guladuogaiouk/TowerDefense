@@ -1,32 +1,52 @@
 import SwiftUI
+import Combine
+
 var cellWidth: Double = ScreenSize.cellScale
 var cellHeight: Double = ScreenSize.cellScale
-
+var timer: AnyCancellable? = nil
 let path: [(Int, Int)] = [
     (1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8),
     (7, 7), (7, 6), (7, 5), (7, 4), (8, 4), (9, 4),
     (9, 3), (9, 2), (10, 2), (11, 2), (12, 2), (13, 2), (14, 2), (15, 2)
 ]
 var towerCards: [Tower] = [
-    AttackerTower(name: "attacker1", hp: 100, price: 150, cd: 20, level: 1, position: (0,0)),
-    AttackerTower(name: "attacker1", hp: 100, price: 50, cd: 10, level: 2, position: (0,0)),
-    AttackerTower(name: "attacker1", hp: 100, price: 200, cd: 30, level: 3, position: (0,0)),
-    AttackerTower(name: "attacker2", hp: 100, price: 150, cd: 20, level: 1, position: (0,0)),
-    AttackerTower(name: "attacker2", hp: 100, price: 50, cd: 10, level: 2, position: (0,0)),
-    AttackerTower(name: "attacker2", hp: 100, price: 200, cd: 30, level: 3, position: (0,0)),
-    AttackerTower(name: "attacker3", hp: 100, price: 150, cd: 20, level: 1, position: (0,0)),
-    AttackerTower(name: "attacker3", hp: 100, price: 50, cd: 10, level: 2, position: (0,0)),
-    AttackerTower(name: "attacker3", hp: 100, price: 200, cd: 30, level: 3, position: (0,0)),
-    AttackerTower(name: "attacker4", hp: 100, price: 150, cd: 20, level: 1, position: (0,0)),
-    AttackerTower(name: "attacker4", hp: 100, price: 50, cd: 10, level: 2, position: (0,0)),
-    AttackerTower(name: "attacker4", hp: 100, price: 200, cd: 30, level: 3, position: (0,0))
+    AttackerTower(name: "attacker1", level: 1, position: (0,0)),
+    AttackerTower(name: "attacker2", level: 1, position: (0,0)),
+    AttackerTower(name: "attacker3", level: 1, position: (0,0)),
+    AttackerTower(name: "attacker4", level: 1, position: (0,0))
 ]
 var turnPoint: [(Double,Double)] = []
+var lastTurnPoint: [Int] = []
+class EnemyTracker {
+    @EnvironmentObject var enemyData: EnemyData
+    var timer: DispatchSourceTimer?
 
+    func startTimer() {
+        let queue = DispatchQueue.main
+        timer = DispatchSource.makeTimerSource(queue: queue)
+        timer?.schedule(deadline: .now(), repeating: 0.016)
+        timer?.setEventHandler { [weak self] in
+            self?.logEnemyPositions()
+        }
+        timer?.resume()
+    }
+
+    func stopTimer() {
+        timer?.cancel()
+        timer = nil
+    }
+
+    func logEnemyPositions() {
+        print("\(enemyData.enemies[0].position)")
+    }
+}
 class TowerCardViews: ObservableObject{
     @Published var towerCardViews: [TowerCardView] = []
 }
-
+func getRealDistance(towerPositionInt: (Int,Int), enemyPosition:(Double,Double))->Double{
+    let towerPosition = getRealPosition(position: towerPositionInt)
+    return sqrt(pow(enemyPosition.0-towerPosition.0, 2) + pow(enemyPosition.1-towerPosition.0, 1))
+}
 func getRealPosition(position: (Int, Int)) -> (Double, Double) {
     let real_x = Double(position.0) * cellWidth - cellWidth / 2
     let real_y = Double(10 - position.1) * cellHeight - cellHeight / 2
@@ -42,6 +62,7 @@ struct ContentView: View {
     @State var selectedTower: Tower? = nil
     @State var money: Int = 2000
     @State var trigger: [Bool] = []
+    let timer = Timer.publish(every: 0.016, on: .main, in: .common).autoconnect()
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
@@ -49,6 +70,8 @@ struct ContentView: View {
                     .frame(height: cellHeight * 1.0)
                 ZStack{
                     GridView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, trigger: $trigger, path: path)
+                    BorningPointView()
+                        .position(x:getRealPosition(position: path[0]).0, y: getRealPosition(position: path[0]).1)
                     ForEach(enemyData.enemies){enemy in
                         EnemyView(enemy: enemy)
                             .position(x: enemy.position.0, y: enemy.position.1)
@@ -61,7 +84,6 @@ struct ContentView: View {
                             .onTapGesture{
                                 trigger[index] = true
                             }
-                        
                     }
                     ForEach(towerData.towers.indices, id:\.self){ index in
                         let tower = towerData.towers[index]
@@ -79,7 +101,7 @@ struct ContentView: View {
             .background(Color(red: 242/255, green: 242/255, blue: 242/255))
             .onAppear {
                 initVariables()
-                startGame()
+                //                startGame()
             }
             .frame(width: ScreenSize.width, height: ScreenSize.height)
             .simultaneousGesture(
@@ -89,13 +111,62 @@ struct ContentView: View {
                     }
                 }
             )
+            .onReceive(timer) { _ in
+                moveEnemies()
+            }
         }
     }
-    
+    func moveEnemies(){
+        for i in enemyData.enemies.indices {
+            let enemy = enemyData.enemies[i]
+            switch(isEnemyInPath(enemyPostion: enemy.position, lastTurnPointIndex: lastTurnPoint[i])){
+                case 1: enemy.position.1 -= enemy.speed
+                case 2: enemy.position.1 += enemy.speed
+                case 3: enemy.position.0 += enemy.speed
+                case 4: enemy.position.0 -= enemy.speed
+                case 0: lastTurnPoint[i] += 1
+                default: break;
+            }
+        }
+    }
+    func isEnemyInPath(enemyPostion:(Double,Double),lastTurnPointIndex: Int)->Int{
+        if(lastTurnPointIndex == turnPoint.count - 1){ return -1 }
+        let lastTurnPointPosition = turnPoint[lastTurnPointIndex]
+        let nextTurnPointPosition = turnPoint[lastTurnPointIndex + 1]
+        let enemyX = enemyPostion.0
+        let enemyY = enemyPostion.1
+        if(lastTurnPointPosition.0 == nextTurnPointPosition.0 && lastTurnPointPosition.1 > nextTurnPointPosition.1){ //从下向上
+            if(enemyX >= lastTurnPointPosition.0 - cellWidth * 0.5 && enemyX <= lastTurnPointPosition.0 + cellWidth * 0.5){
+                if(enemyY <= lastTurnPointPosition.1 && enemyY >= nextTurnPointPosition.1){
+                    return 1
+                }
+            }
+        }else if(lastTurnPointPosition.0 == nextTurnPointPosition.0 && lastTurnPointPosition.1 < nextTurnPointPosition.1){ //从上向下
+            if(enemyX >= lastTurnPointPosition.0 - cellWidth * 0.5 && enemyX <= lastTurnPointPosition.0 + cellWidth * 0.5){
+                if(enemyY >= lastTurnPointPosition.1 && enemyY <= nextTurnPointPosition.1){
+                    return 2
+                }
+            }
+        }else if(lastTurnPointPosition.1 == nextTurnPointPosition.1 && lastTurnPointPosition.0 < nextTurnPointPosition.0){ //从左到右
+            if(enemyY >= lastTurnPointPosition.1 - cellWidth * 0.5 && enemyY <= lastTurnPointPosition.1 + cellWidth * 0.5){
+                if(enemyX >= lastTurnPointPosition.0 && enemyX <= nextTurnPointPosition.0){
+                    return 3
+                }
+            }
+        }else if(lastTurnPointPosition.1 == nextTurnPointPosition.1 && lastTurnPointPosition.0 > nextTurnPointPosition.0){ //从右到左
+            if(enemyY >= lastTurnPointPosition.1 - cellWidth * 0.5 && enemyY <= lastTurnPointPosition.1 + cellWidth * 0.5){
+                if(enemyX <= lastTurnPointPosition.0 && enemyX >= nextTurnPointPosition.0){
+                    return 4
+                }
+            }
+        }
+        return 0
+    }
     func initVariables() {
         turnPoint = getTurnPoint(path: path)
         for i in enemyData.enemies.indices {
             enemyData.enemies[i].position = turnPoint[0]
+            lastTurnPoint.append(0)
         }
         for i in towerData.towers.indices {
             towerData.towers[i].position = (towerData.towers[i].position.0, towerData.towers[i].position.1)
@@ -121,29 +192,7 @@ struct ContentView: View {
         }
         return turnPoint
     }
-    func startGame(){
-        moveEnemies()
-    }
-    func moveEnemies() {
-        for i in enemyData.enemies.indices{
-            move(enemy:enemyData.enemies[i],to: 1)
-        }
-    }
-    func move(enemy: Enemy, to turnIndex: Int) {
-        guard turnIndex < turnPoint.count else { return }
-        let distance = turnPoint[turnIndex - 1].0 == turnPoint[turnIndex].0 ?
-        abs(turnPoint[turnIndex - 1].1 - turnPoint[turnIndex].1) :
-        abs(turnPoint[turnIndex - 1].0 - turnPoint[turnIndex].0)
-        let duration: Double = Double(distance) / 50 / enemy.speed
-        withAnimation(.linear(duration: duration)) {
-            enemy.position = turnPoint[turnIndex]
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-            move(enemy: enemy, to: turnIndex + 1)
-        }
-        
-    }
-    
+
     struct HeaderView: View {
         @Binding var isCardClicked: Bool
         @Binding var selectedTower: Tower?
