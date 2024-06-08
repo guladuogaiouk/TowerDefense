@@ -1,9 +1,7 @@
 import SwiftUI
-import Combine
 
 var cellWidth: Double = ScreenSize.cellScale
 var cellHeight: Double = ScreenSize.cellScale
-var timer: AnyCancellable? = nil
 let path: [(Int, Int)] = [
     (1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8),
     (7, 7), (7, 6), (7, 5), (7, 4), (8, 4), (9, 4),
@@ -17,40 +15,21 @@ var towerCards: [Tower] = [
 ]
 var turnPoint: [(Double,Double)] = []
 var lastTurnPoint: [Int] = []
-class EnemyTracker {
-    @EnvironmentObject var enemyData: EnemyData
-    var timer: DispatchSourceTimer?
 
-    func startTimer() {
-        let queue = DispatchQueue.main
-        timer = DispatchSource.makeTimerSource(queue: queue)
-        timer?.schedule(deadline: .now(), repeating: 0.016)
-        timer?.setEventHandler { [weak self] in
-            self?.logEnemyPositions()
-        }
-        timer?.resume()
-    }
-
-    func stopTimer() {
-        timer?.cancel()
-        timer = nil
-    }
-
-    func logEnemyPositions() {
-        print("\(enemyData.enemies[0].position)")
-    }
-}
 class TowerCardViews: ObservableObject{
     @Published var towerCardViews: [TowerCardView] = []
 }
 func getRealDistance(towerPositionInt: (Int,Int), enemyPosition:(Double,Double))->Double{
     let towerPosition = getRealPosition(position: towerPositionInt)
-    return sqrt(pow(enemyPosition.0-towerPosition.0, 2) + pow(enemyPosition.1-towerPosition.0, 1))
+    return sqrt(pow(enemyPosition.0-towerPosition.0, 2) + pow(enemyPosition.1-towerPosition.1, 2))
 }
 func getRealPosition(position: (Int, Int)) -> (Double, Double) {
     let real_x = Double(position.0) * cellWidth - cellWidth / 2
     let real_y = Double(10 - position.1) * cellHeight - cellHeight / 2
     return (real_x, real_y)
+}
+func getRealLength(length: Int)->Double{
+    return Double(length) * cellWidth
 }
 
 struct ContentView: View {
@@ -62,6 +41,7 @@ struct ContentView: View {
     @State var selectedTower: Tower? = nil
     @State var money: Int = 2000
     @State var trigger: [Bool] = []
+    @State var towerRotateAngles: [Double] = []
     let timer = Timer.publish(every: 0.016, on: .main, in: .common).autoconnect()
     var body: some View {
         GeometryReader { geometry in
@@ -69,7 +49,7 @@ struct ContentView: View {
                 HeaderView(isCardClicked: $isCardClicked,selectedTower: $selectedTower,money: $money)
                     .frame(height: cellHeight * 1.0)
                 ZStack{
-                    GridView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, trigger: $trigger, path: path)
+                    GridView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, trigger: $trigger, towerRotateAngles: $towerRotateAngles, path: path)
                     BorningPointView()
                         .position(x:getRealPosition(position: path[0]).0, y: getRealPosition(position: path[0]).1)
                     ForEach(enemyData.enemies){enemy in
@@ -79,7 +59,7 @@ struct ContentView: View {
                     ForEach(towerData.towers.indices, id:\.self){ index in
                         let tower = towerData.towers[index]
                         let realPosition = getRealPosition(position: tower.position)
-                        TowerView(tower: tower)
+                        TowerView(angle: $towerRotateAngles[index], tower: tower)
                             .position(x: realPosition.0,y:realPosition.1)
                             .onTapGesture{
                                 trigger[index] = true
@@ -101,7 +81,8 @@ struct ContentView: View {
             .background(Color(red: 242/255, green: 242/255, blue: 242/255))
             .onAppear {
                 initVariables()
-                //                startGame()
+                print(atan2(12.0,0.0))
+                print(atan2(-12.0,0.0))
             }
             .frame(width: ScreenSize.width, height: ScreenSize.height)
             .simultaneousGesture(
@@ -113,8 +94,31 @@ struct ContentView: View {
             )
             .onReceive(timer) { _ in
                 moveEnemies()
+                rotateTowers()
             }
         }
+    }
+    func rotateTowers(){
+        for i in towerData.towers.indices{
+            let tower = towerData.towers[i]
+            if let attackerTower = tower as? AttackerTower {
+                let range = getRealLength(length: attackerTower.range) + 2
+                for enemy in enemyData.enemies {
+                    if getRealDistance(towerPositionInt: attackerTower.position, enemyPosition: enemy.position) <= range{
+                        towerRotateAngles[i] = getRotateAngle(towerPostionInt: attackerTower.position, enemyPosition: enemy.position)
+                        break
+                    }
+                }
+            }
+        }
+    }
+    func getRotateAngle(towerPostionInt:(Int,Int),enemyPosition:(Double,Double)) -> Double{
+        let towerPosition: (Double,Double) = getRealPosition(position: towerPostionInt)
+        let deltaX = towerPosition.0 - enemyPosition.0
+        let deltaY = towerPosition.1 - enemyPosition.1
+        let angle = atan2(deltaY, deltaX)
+        let angleInDegrees = angle * 180 / .pi
+        return angleInDegrees
     }
     func moveEnemies(){
         for i in enemyData.enemies.indices {
@@ -125,7 +129,9 @@ struct ContentView: View {
                 case 3: enemy.position.0 += enemy.speed
                 case 4: enemy.position.0 -= enemy.speed
                 case 0: lastTurnPoint[i] += 1
-                default: break;
+                default: if let index = enemyData.enemies.firstIndex(of: enemy){
+                    enemyData.enemies.remove(at: index);
+                }
             }
         }
     }
@@ -277,6 +283,7 @@ struct ContentView: View {
         @Binding var selectedTower: Tower?
         @Binding var money: Int
         @Binding var trigger: [Bool]
+        @Binding var towerRotateAngles: [Double]
         var path: [(Int, Int)]
         var body: some View {
             VStack(spacing: 0) {
@@ -284,7 +291,7 @@ struct ContentView: View {
                     HStack(spacing: 0) {
                         ForEach(0..<15, id: \.self) { column in
                             let isPathCell = path.contains(where: { $0 == (column + 1, 9 - row) })
-                            CellView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, trigger: $trigger, position: (column + 1, 9 - row), isPathCell: isPathCell)
+                            CellView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, trigger: $trigger, towerRotateAngles: $towerRotateAngles, position: (column + 1, 9 - row), isPathCell: isPathCell)
                         }
                     }
                 }
@@ -297,6 +304,7 @@ struct ContentView: View {
         @Binding var selectedTower: Tower?
         @Binding var money: Int
         @Binding var trigger: [Bool]
+        @Binding var towerRotateAngles: [Double]
         @EnvironmentObject var towerData: TowerData
         @EnvironmentObject var towerCardViews: TowerCardViews
         @EnvironmentObject var coveredCells: CoveredCells
@@ -325,6 +333,7 @@ struct ContentView: View {
                 money -= newTower.price
                 towerData.towers.append(newTower)
                 trigger.append(false)
+                towerRotateAngles.append(-90)
                 coveredCells.coveredCells.append(position)
                 isCardClicked = false
                 for towercard in towerCardViews.towerCardViews{

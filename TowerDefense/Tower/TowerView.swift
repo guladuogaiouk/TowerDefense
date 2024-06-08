@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TowerView: View {
     @State var showHpbar: Bool = false
-    @State var angle: Double = 0
+    @Binding var angle: Double
     var tower: Tower
     var originalHP: Int {
         return tower.hp
@@ -27,10 +27,5 @@ struct TowerView: View {
                 .frame(width: width)
             : nil
         }.frame(width: cellWidth * 0.8,height: cellHeight * 0.8)
-        .onAppear(){
-            withAnimation(.linear(duration: 5)){
-                angle = 1080
-            }
-        }
     }
 }
