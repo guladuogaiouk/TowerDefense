@@ -8,9 +8,18 @@ let path: [(Int, Int)] = [
     (9, 3), (9, 2), (10, 2), (11, 2), (12, 2), (13, 2), (14, 2), (15, 2)
 ]
 var towerCards: [Tower] = [
-    AttackerTower(name: "attacker1", hp: 100, price: 150, cd: 5, level: 1, position: (0,0)),
+    AttackerTower(name: "attacker1", hp: 100, price: 150, cd: 20, level: 1, position: (0,0)),
     AttackerTower(name: "attacker1", hp: 100, price: 50, cd: 10, level: 2, position: (0,0)),
-    AttackerTower(name: "attacker1", hp: 100, price: 200, cd: 15, level: 3, position: (0,0))
+    AttackerTower(name: "attacker1", hp: 100, price: 200, cd: 30, level: 3, position: (0,0)),
+    AttackerTower(name: "attacker2", hp: 100, price: 150, cd: 20, level: 1, position: (0,0)),
+    AttackerTower(name: "attacker2", hp: 100, price: 50, cd: 10, level: 2, position: (0,0)),
+    AttackerTower(name: "attacker2", hp: 100, price: 200, cd: 30, level: 3, position: (0,0)),
+    AttackerTower(name: "attacker3", hp: 100, price: 150, cd: 20, level: 1, position: (0,0)),
+    AttackerTower(name: "attacker3", hp: 100, price: 50, cd: 10, level: 2, position: (0,0)),
+    AttackerTower(name: "attacker3", hp: 100, price: 200, cd: 30, level: 3, position: (0,0)),
+    AttackerTower(name: "attacker4", hp: 100, price: 150, cd: 20, level: 1, position: (0,0)),
+    AttackerTower(name: "attacker4", hp: 100, price: 50, cd: 10, level: 2, position: (0,0)),
+    AttackerTower(name: "attacker4", hp: 100, price: 200, cd: 30, level: 3, position: (0,0))
 ]
 var turnPoint: [(Double,Double)] = []
 var coveredCells: [(Int,Int)] = []
@@ -41,7 +50,7 @@ struct ContentView: View {
     @EnvironmentObject var towerCardViews: TowerCardViews
     @State var isCardClicked: Bool = false
     @State var selectedTower: Tower? = nil
-    @State var money: Int = 500
+    @State var money: Int = 2000
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
@@ -57,6 +66,9 @@ struct ContentView: View {
                         TowerView(tower: tower)
                             .frame(width: cellWidth * 0.8)
                             .position(x: tower.position.0, y: tower.position.1)
+                            .onLongPressGesture{
+                                print("pressed")
+                            }
                     }
                 }
                 .frame(height: cellHeight * 9.0)
@@ -180,7 +192,6 @@ struct HeaderView: View {
                                 if(!towerCardView.viewModel.isCoolingDown){
                                     clickTowerCard(tower: tower)
                                 }
-                                
                             }
                             .overlay(
                                 Group {
