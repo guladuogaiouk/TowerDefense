@@ -51,23 +51,31 @@ struct ContentView: View {
     @State var isCardClicked: Bool = false
     @State var selectedTower: Tower? = nil
     @State var money: Int = 2000
+    @State var trigger: [Bool] = []
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
                 HeaderView(isCardClicked: $isCardClicked,selectedTower: $selectedTower,money: $money)
                     .frame(height: cellHeight * 1.0)
                 ZStack{
-                    GridView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, path: path)
+                    GridView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, trigger: $trigger, path: path)
                     ForEach(enemyData.enemies){enemy in
                         EnemyView(enemy: enemy)
                             .position(x: enemy.position.0, y: enemy.position.1)
                     }
-                    ForEach(towerData.towers){ tower in
-                        TowerView(tower: tower)
-                            .frame(width: cellWidth * 0.8)
+                    ForEach(towerData.towers.indices,id:\.self){ index in
+                        
+                        let tower = towerData.towers[index]
+                        TowerView(trigger: $trigger[index], tower: tower)
                             .position(x: tower.position.0, y: tower.position.1)
-                            .onLongPressGesture{
-                                print("pressed")
+                            .onTapGesture{
+                                for i in trigger.indices{
+                                    if(i == index && trigger[i] == false){
+                                        trigger[i] = true
+                                    }else{
+                                        trigger[i] = false
+                                    }
+                                }
                             }
                     }
                 }
@@ -80,7 +88,13 @@ struct ContentView: View {
                 startGame()
             }
             .frame(width: ScreenSize.width, height: ScreenSize.height)
+            .onTapGesture {
+                for i in trigger.indices{
+                    trigger[i] = false
+                }
+            }
         }
+        
     }
     
     func initVariables() {
@@ -101,8 +115,6 @@ struct ContentView: View {
             towerCardViews.towerCardViews.append(towerCardView)
         }
     }
-
-    
     func getTurnPoint(path:[(Int,Int)]) -> [(Double,Double)]{
         var turnPoint:[(Double,Double)] = []
         for i in path.indices{
@@ -114,7 +126,6 @@ struct ContentView: View {
         }
         return turnPoint
     }
-    
     func startGame(){
         moveEnemies()
     }
@@ -123,12 +134,11 @@ struct ContentView: View {
             move(enemy:enemyData.enemies[i],to: 1)
         }
     }
-    
     func move(enemy: Enemy, to turnIndex: Int) {
         guard turnIndex < turnPoint.count else { return }
         let distance = turnPoint[turnIndex - 1].0 == turnPoint[turnIndex].0 ?
-                       abs(turnPoint[turnIndex - 1].1 - turnPoint[turnIndex].1) :
-                       abs(turnPoint[turnIndex - 1].0 - turnPoint[turnIndex].0)
+        abs(turnPoint[turnIndex - 1].1 - turnPoint[turnIndex].1) :
+        abs(turnPoint[turnIndex - 1].0 - turnPoint[turnIndex].0)
         let duration: Double = Double(distance) / 50 / enemy.speed
         withAnimation(.linear(duration: duration)) {
             enemy.position = turnPoint[turnIndex]
@@ -136,147 +146,148 @@ struct ContentView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
             move(enemy: enemy, to: turnIndex + 1)
         }
+        
     }
-}
-
-struct HeaderView: View {
-    @Binding var isCardClicked: Bool
-    @Binding var selectedTower: Tower?
-    @Binding var money: Int
-    @EnvironmentObject var towerCardViews: TowerCardViews
-    func clickTowerCard(tower: Tower){
-        if selectedTower != nil{
-            if selectedTower == tower{
-                isCardClicked.toggle()
+    
+    struct HeaderView: View {
+        @Binding var isCardClicked: Bool
+        @Binding var selectedTower: Tower?
+        @Binding var money: Int
+        @EnvironmentObject var towerCardViews: TowerCardViews
+        func clickTowerCard(tower: Tower){
+            if selectedTower != nil{
+                if selectedTower == tower{
+                    isCardClicked.toggle()
+                }else{
+                    selectedTower = tower
+                    isCardClicked = true
+                }
             }else{
-                selectedTower = tower
                 isCardClicked = true
+                selectedTower = tower
             }
-        }else{
-            isCardClicked = true
-            selectedTower = tower
         }
-    }
-    var body: some View {
-        HStack {
+        var body: some View {
             HStack {
-                Image(systemName: "cross.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 30, height: 30)
-                Text("\(money)")
-                    .font(.title)
-                    .fontWeight(.bold)
+                HStack {
+                    Image(systemName: "cross.fill")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 30, height: 30)
+                    Text("\(money)")
+                        .font(.title)
+                        .fontWeight(.bold)
+                }
+                .foregroundColor(Color(red: 112/255, green: 173/255, blue: 71/255))
+                .frame(width: 140, height: 90, alignment: .center)
+                .padding(10)
+                .frame(maxHeight: .infinity)
+                
+                HStack {
+                    ForEach(0..<12, id: \.self) { index in
+                        if index < towerCardViews.towerCardViews.count{
+                            let towerCardView = towerCardViews.towerCardViews[index]
+                            let tower = towerCardView.viewModel.tower
+                            towerCardView
+                                .background(Color(red: 190/255, green: 190/255, blue: 190/255))
+                                .overlay(
+                                    Group {
+                                        if isCardClicked && selectedTower == tower {
+                                            Rectangle()
+                                                .stroke(Color.yellow.opacity(0.5), lineWidth: 5)
+                                        }
+                                    }
+                                )
+                                .onTapGesture {
+                                    if(!towerCardView.viewModel.isCoolingDown){
+                                        clickTowerCard(tower: tower)
+                                    }
+                                }
+                                .overlay(
+                                    Group {
+                                        if money < tower.price {
+                                            Rectangle()
+                                                .fill(Color.black.opacity(0.6))
+                                                .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
+                                        }
+                                    }
+                                )
+                        }else{
+                            Rectangle()
+                                .fill(Color(red: 242/255, green: 242/255, blue: 242/255))
+                                .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
+                        }
+                        
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .foregroundColor(Color(red: 112/255, green: 173/255, blue: 71/255))
-            .frame(width: 140, height: 90, alignment: .center)
-            .padding(10)
+            .padding(.bottom, 30)
             .frame(maxHeight: .infinity)
-
-            HStack {
-                ForEach(0..<12, id: \.self) { index in
-                    if index < towerCardViews.towerCardViews.count{
-                        let towerCardView = towerCardViews.towerCardViews[index]
-                        let tower = towerCardView.viewModel.tower
-                        towerCardView
-                            .background(Color(red: 190/255, green: 190/255, blue: 190/255))
-                            .overlay(
-                                Group {
-                                    if isCardClicked && selectedTower == tower {
-                                        Rectangle()
-                                            .stroke(Color.yellow.opacity(0.5), lineWidth: 5)
-                                    }
-                                }
-                            )
-                            .onTapGesture {
-                                if(!towerCardView.viewModel.isCoolingDown){
-                                    clickTowerCard(tower: tower)
-                                }
-                            }
-                            .overlay(
-                                Group {
-                                    if money < tower.price {
-                                        Rectangle()
-                                            .fill(Color.black.opacity(0.6))
-                                            .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
-                                    }
-                                }
-                            )
-                    }else{
-                        Rectangle()
-                            .fill(Color(red: 242/255, green: 242/255, blue: 242/255))
-                            .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
-                    }
-                    
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color(red: 217/255, green: 217/255, blue: 217/255))
         }
-        .padding(.bottom, 30)
-        .frame(maxHeight: .infinity)
-        .background(Color(red: 217/255, green: 217/255, blue: 217/255))
     }
-}
-
-struct GridView: View {
-    @Binding var isCardClicked: Bool
-    @Binding var selectedTower: Tower?
-    @Binding var money: Int
-    var path: [(Int, Int)]
-    var body: some View {
-        VStack(spacing: 0) {
-            ForEach(0..<9, id: \.self) { row in
-                HStack(spacing: 0) {
-                    ForEach(0..<15, id: \.self) { column in
-                        let isPathCell = path.contains(where: { $0 == (column + 1, 9 - row) })
-                        CellView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, position: (column + 1, 9 - row), isPathCell: isPathCell)
+    
+    struct GridView: View {
+        @Binding var isCardClicked: Bool
+        @Binding var selectedTower: Tower?
+        @Binding var money: Int
+        @Binding var trigger: [Bool]
+        var path: [(Int, Int)]
+        var body: some View {
+            VStack(spacing: 0) {
+                ForEach(0..<9, id: \.self) { row in
+                    HStack(spacing: 0) {
+                        ForEach(0..<15, id: \.self) { column in
+                            let isPathCell = path.contains(where: { $0 == (column + 1, 9 - row) })
+                            CellView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, trigger: $trigger, position: (column + 1, 9 - row), isPathCell: isPathCell)
+                        }
                     }
                 }
             }
         }
     }
-}
-
-struct CellView: View {
-    @Binding var isCardClicked: Bool
-    @Binding var selectedTower: Tower?
-    @Binding var money: Int
-    @EnvironmentObject var towerData: TowerData
-    @EnvironmentObject var towerCardViews: TowerCardViews
-    var position: (Int,Int)
-    var isPathCell: Bool
-    var body: some View {
-        Rectangle()
-            .fill(isPathCell ? Color.white :
-                  !isCardClicked ? Color(red: 242/255, green: 242/255, blue: 242/255)
-                  : coveredCells.contains(where: { $0 == position}) ? Color(red: 242/255, green: 242/255, blue: 242/255)
-                  : Color(red: 150/255, green: 150/255, blue: 150/255))
-            .frame(width: cellWidth * 1.0, height: cellHeight * 1.0)
-            .overlay(
-                isPathCell ? nil : Rectangle()
-                    .stroke(Color(red: 217/255, green: 217/255, blue: 217/255), lineWidth: 1)
-            )
-            .onTapGesture {
-                if(isCardClicked && !coveredCells.contains(where: { $0 == position})){
-                    layoutTower()
+    
+    struct CellView: View {
+        @Binding var isCardClicked: Bool
+        @Binding var selectedTower: Tower?
+        @Binding var money: Int
+        @Binding var trigger: [Bool]
+        @EnvironmentObject var towerData: TowerData
+        @EnvironmentObject var towerCardViews: TowerCardViews
+        var position: (Int,Int)
+        var isPathCell: Bool
+        var body: some View {
+            Rectangle()
+                .fill(isPathCell ? Color.white :
+                        !isCardClicked ? Color(red: 242/255, green: 242/255, blue: 242/255)
+                      : coveredCells.contains(where: { $0 == position}) ? Color(red: 242/255, green: 242/255, blue: 242/255)
+                      : Color(red: 150/255, green: 150/255, blue: 150/255))
+                .frame(width: cellWidth * 1.0, height: cellHeight * 1.0)
+                .overlay(
+                    isPathCell ? nil : Rectangle()
+                        .stroke(Color(red: 217/255, green: 217/255, blue: 217/255), lineWidth: 1)
+                )
+                .onTapGesture {
+                    if(isCardClicked && !coveredCells.contains(where: { $0 == position})){
+                        layoutTower()
+                    }
                 }
-            }
-    }
-    func layoutTower(){
-        if let selectedTower = selectedTower {
-            let newTower = selectedTower.createCopy(at: position)
-            money -= newTower.price
-            towerData.towers.append(newTower)
-            coveredCells.append(position)
-            isCardClicked = false
-            for towercard in towerCardViews.towerCardViews{
-                if(towercard.viewModel.tower == selectedTower){
-                    towercard.viewModel.startWaiting()
+        }
+        func layoutTower(){
+            if let selectedTower = selectedTower {
+                let newTower = selectedTower.createCopy(at: position)
+                money -= newTower.price
+                towerData.towers.append(newTower)
+                trigger.append(false)
+                coveredCells.append(position)
+                isCardClicked = false
+                for towercard in towerCardViews.towerCardViews{
+                    if(towercard.viewModel.tower == selectedTower){
+                        towercard.viewModel.startWaiting()
+                    }
                 }
             }
         }
     }
-}
-#Preview {
-    ContentView()
 }
