@@ -10,6 +10,7 @@
 		581421032C12869600B67BA9 /* TowerCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581421022C12869500B67BA9 /* TowerCardView.swift */; };
 		581421052C12ADBE00B67BA9 /* TowerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581421042C12ADBE00B67BA9 /* TowerView.swift */; };
 		581421072C12B85B00B67BA9 /* AttackerEmemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581421062C12B85B00B67BA9 /* AttackerEmemy.swift */; };
+		581421092C143C4200B67BA9 /* SideButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581421082C143C4200B67BA9 /* SideButtonView.swift */; };
 		581DF9282C115DD6002A0E59 /* AttackerTower.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581DF9272C115DD6002A0E59 /* AttackerTower.swift */; };
 		581DF92B2C115EEC002A0E59 /* Bullets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581DF92A2C115EEC002A0E59 /* Bullets.swift */; };
 		581DF94D2C118E1C002A0E59 /* EnemyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581DF94C2C118E1C002A0E59 /* EnemyView.swift */; };
@@ -26,6 +27,7 @@
 		581421022C12869500B67BA9 /* TowerCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TowerCardView.swift; sourceTree = "<group>"; };
 		581421042C12ADBE00B67BA9 /* TowerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TowerView.swift; sourceTree = "<group>"; };
 		581421062C12B85B00B67BA9 /* AttackerEmemy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttackerEmemy.swift; sourceTree = "<group>"; };
+		581421082C143C4200B67BA9 /* SideButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SideButtonView.swift; sourceTree = "<group>"; };
 		581DF9272C115DD6002A0E59 /* AttackerTower.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttackerTower.swift; sourceTree = "<group>"; };
 		581DF92A2C115EEC002A0E59 /* Bullets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bullets.swift; sourceTree = "<group>"; };
 		581DF94C2C118E1C002A0E59 /* EnemyView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnemyView.swift; sourceTree = "<group>"; };
@@ -122,6 +124,7 @@
 				58D40AD22C109F9F00DCF246 /* Assets.xcassets */,
 				58D40AD42C109F9F00DCF246 /* Preview Content */,
 				581421022C12869500B67BA9 /* TowerCardView.swift */,
+				581421082C143C4200B67BA9 /* SideButtonView.swift */,
 			);
 			path = TowerDefense;
 			sourceTree = "<group>";
@@ -211,6 +214,7 @@
 				581421052C12ADBE00B67BA9 /* TowerView.swift in Sources */,
 				58D40ACF2C109F9D00DCF246 /* TowerDefenseApp.swift in Sources */,
 				581DF9282C115DD6002A0E59 /* AttackerTower.swift in Sources */,
+				581421092C143C4200B67BA9 /* SideButtonView.swift in Sources */,
 				58D40ADF2C10A2DA00DCF246 /* Tower.swift in Sources */,
 				581421072C12B85B00B67BA9 /* AttackerEmemy.swift in Sources */,
 				581DF92B2C115EEC002A0E59 /* Bullets.swift in Sources */,

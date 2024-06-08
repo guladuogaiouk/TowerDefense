@@ -22,22 +22,11 @@ var towerCards: [Tower] = [
     AttackerTower(name: "attacker4", hp: 100, price: 200, cd: 30, level: 3, position: (0,0))
 ]
 var turnPoint: [(Double,Double)] = []
-var coveredCells: [(Int,Int)] = []
 
-class TowerData: ObservableObject{
-    @Published var towers: [Tower] = []
-}
-class EnemyData: ObservableObject {
-    @Published var enemies: [Enemy] = [
-        AttackerEnemy(name: "shield1", speed: 1, hp: 100, value: 25, position: (0, 0), level: 1),
-        AttackerEnemy(name: "shield1", speed: 0.8, hp: 100, value: 25, position: (0, 0), level: 2),
-        AttackerEnemy(name: "shield1", speed: 1.2, hp: 100, value: 25, position: (0, 0), level: 3),
-        BossAttackEnemy(name: "boss1", speed: 0.7, hp: 500, value: 100, position: (0, 0), level: 1)
-    ]
-}
 class TowerCardViews: ObservableObject{
     @Published var towerCardViews: [TowerCardView] = []
 }
+
 func getRealPosition(position: (Int, Int)) -> (Double, Double) {
     let real_x = Double(position.0) * cellWidth - cellWidth / 2
     let real_y = Double(10 - position.1) * cellHeight - cellHeight / 2
@@ -48,6 +37,7 @@ struct ContentView: View {
     @StateObject var enemyData = EnemyData()
     @EnvironmentObject var towerData: TowerData
     @EnvironmentObject var towerCardViews: TowerCardViews
+    @EnvironmentObject var coveredCells: CoveredCells
     @State var isCardClicked: Bool = false
     @State var selectedTower: Tower? = nil
     @State var money: Int = 2000
@@ -63,21 +53,25 @@ struct ContentView: View {
                         EnemyView(enemy: enemy)
                             .position(x: enemy.position.0, y: enemy.position.1)
                     }
-                    ForEach(towerData.towers.indices,id:\.self){ index in
-                        
+                    ForEach(towerData.towers.indices, id:\.self){ index in
                         let tower = towerData.towers[index]
-                        TowerView(trigger: $trigger[index], tower: tower)
-                            .position(x: tower.position.0, y: tower.position.1)
+                        let realPosition = getRealPosition(position: tower.position)
+                        TowerView(tower: tower)
+                            .position(x: realPosition.0,y:realPosition.1)
                             .onTapGesture{
-                                for i in trigger.indices{
-                                    if(i == index && trigger[i] == false){
-                                        trigger[i] = true
-                                    }else{
-                                        trigger[i] = false
-                                    }
-                                }
+                                trigger[index] = true
                             }
+                        
                     }
+                    ForEach(towerData.towers.indices, id:\.self){ index in
+                        let tower = towerData.towers[index]
+                        let realPosition = getRealPosition(position: tower.position)
+                        trigger[index] == true ?
+                        SideButtonView(money: $money, tower: tower)
+                            .position(x: realPosition.0,y:realPosition.1)
+                        : nil
+                    }
+                    
                 }
                 .frame(height: cellHeight * 9.0)
             }
@@ -88,13 +82,14 @@ struct ContentView: View {
                 startGame()
             }
             .frame(width: ScreenSize.width, height: ScreenSize.height)
-            .onTapGesture {
-                for i in trigger.indices{
-                    trigger[i] = false
+            .simultaneousGesture(
+                TapGesture().onEnded{
+                    for i in trigger.indices{
+                        trigger[i] = false
+                    }
                 }
-            }
+            )
         }
-        
     }
     
     func initVariables() {
@@ -103,10 +98,10 @@ struct ContentView: View {
             enemyData.enemies[i].position = turnPoint[0]
         }
         for i in towerData.towers.indices {
-            towerData.towers[i].position = getRealPosition(position: (Int(towerData.towers[i].position.0), Int(towerData.towers[i].position.1)))
+            towerData.towers[i].position = (towerData.towers[i].position.0, towerData.towers[i].position.1)
         }
         for i in path.indices {
-            coveredCells.append(path[i])
+            coveredCells.coveredCells.append(path[i])
         }
         for tower in towerCards {
             let viewModel = TowerCardViewModel(tower: tower)
@@ -255,13 +250,14 @@ struct ContentView: View {
         @Binding var trigger: [Bool]
         @EnvironmentObject var towerData: TowerData
         @EnvironmentObject var towerCardViews: TowerCardViews
+        @EnvironmentObject var coveredCells: CoveredCells
         var position: (Int,Int)
         var isPathCell: Bool
         var body: some View {
             Rectangle()
                 .fill(isPathCell ? Color.white :
                         !isCardClicked ? Color(red: 242/255, green: 242/255, blue: 242/255)
-                      : coveredCells.contains(where: { $0 == position}) ? Color(red: 242/255, green: 242/255, blue: 242/255)
+                      : coveredCells.coveredCells.contains(where: { $0 == position}) ? Color(red: 242/255, green: 242/255, blue: 242/255)
                       : Color(red: 150/255, green: 150/255, blue: 150/255))
                 .frame(width: cellWidth * 1.0, height: cellHeight * 1.0)
                 .overlay(
@@ -269,7 +265,7 @@ struct ContentView: View {
                         .stroke(Color(red: 217/255, green: 217/255, blue: 217/255), lineWidth: 1)
                 )
                 .onTapGesture {
-                    if(isCardClicked && !coveredCells.contains(where: { $0 == position})){
+                    if(isCardClicked && !coveredCells.coveredCells.contains(where: { $0 == position})){
                         layoutTower()
                     }
                 }
@@ -280,7 +276,7 @@ struct ContentView: View {
                 money -= newTower.price
                 towerData.towers.append(newTower)
                 trigger.append(false)
-                coveredCells.append(position)
+                coveredCells.coveredCells.append(position)
                 isCardClicked = false
                 for towercard in towerCardViews.towerCardViews{
                     if(towercard.viewModel.tower == selectedTower){
