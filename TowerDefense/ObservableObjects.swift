@@ -17,10 +17,10 @@ class TowerData: ObservableObject{
 }
 class EnemyData: ObservableObject {
     @Published var enemies: [Enemy] = [
-        AttackerEnemy(name: "shield1", speed: 1.0, hp: 100, value: 25, position: (0, 0), level: 1),
-//        AttackerEnemy(name: "shield1", speed: 1.2, hp: 100, value: 25, position: (0, 0), level: 2),
-//        AttackerEnemy(name: "shield1", speed: 1.0, hp: 100, value: 25, position: (0, 0), level: 3),
-//        BossAttackEnemy(name: "boss1", speed: 0.7, hp: 500, value: 100, position: (0, 0), level: 1)
+        AttackerEnemy(name: "shield1", speed: 0.8, hp: 100, value: 25, position: (0, 0), level: 1),
+        AttackerEnemy(name: "shield1", speed: 1.2, hp: 100, value: 25, position: (0, 0), level: 2),
+        AttackerEnemy(name: "shield1", speed: 1.0, hp: 100, value: 25, position: (0, 0), level: 3),
+        BossAttackEnemy(name: "boss1", speed: 1.5, hp: 500, value: 100, position: (0, 0), level: 1)
     ]
 }
 class ScreenSize: ObservableObject {

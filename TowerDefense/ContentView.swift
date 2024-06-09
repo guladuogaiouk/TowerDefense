@@ -19,9 +19,12 @@ var lastTurnPoint: [Int] = []
 class TowerCardViews: ObservableObject{
     @Published var towerCardViews: [TowerCardView] = []
 }
+func getDistance(position1:(Double,Double),position2:(Double,Double))->Double{
+    return sqrt(pow(position1.0-position2.0, 2) + pow(position1.1-position2.1, 2))
+}
 func getRealDistance(towerPositionInt: (Int,Int), enemyPosition:(Double,Double))->Double{
     let towerPosition = getRealPosition(position: towerPositionInt)
-    return sqrt(pow(enemyPosition.0-towerPosition.0, 2) + pow(enemyPosition.1-towerPosition.1, 2))
+    return getDistance(position1: towerPosition, position2: enemyPosition)
 }
 func getRealPosition(position: (Int, Int)) -> (Double, Double) {
     let real_x = Double(position.0) * cellWidth - cellWidth / 2
@@ -81,8 +84,6 @@ struct ContentView: View {
             .background(Color(red: 242/255, green: 242/255, blue: 242/255))
             .onAppear {
                 initVariables()
-                print(atan2(12.0,0.0))
-                print(atan2(-12.0,0.0))
             }
             .frame(width: ScreenSize.width, height: ScreenSize.height)
             .simultaneousGesture(
@@ -103,7 +104,8 @@ struct ContentView: View {
             let tower = towerData.towers[i]
             if let attackerTower = tower as? AttackerTower {
                 let range = getRealLength(length: attackerTower.range) + 2
-                for enemy in enemyData.enemies {
+                for j in getAllEnemiesOrder() {
+                    let enemy = enemyData.enemies[j]
                     if getRealDistance(towerPositionInt: attackerTower.position, enemyPosition: enemy.position) <= range{
                         towerRotateAngles[i] = getRotateAngle(towerPostionInt: attackerTower.position, enemyPosition: enemy.position)
                         break
@@ -112,6 +114,37 @@ struct ContentView: View {
             }
         }
     }
+    func getAllEnemiesOrder() -> [Int] {
+        var enemyOrder: [Int] = []
+        var indexedEnemies: [(index: Int, turnPoint: Int)] = []
+        for i in lastTurnPoint.indices {
+            indexedEnemies.append((index: i, turnPoint: lastTurnPoint[i]))
+        }
+        indexedEnemies.sort { $0.turnPoint > $1.turnPoint }
+        var i = 0
+        while i < indexedEnemies.count {
+            let currentTurnPoint = indexedEnemies[i].turnPoint
+            var sameTurnPointEnemies: [(index: Int, distance: Double)] = []
+            while i < indexedEnemies.count && indexedEnemies[i].turnPoint == currentTurnPoint {
+                let enemyIndex = indexedEnemies[i].index
+                if currentTurnPoint < turnPoint.count - 1 {
+                    let distance = getDistance(position1: turnPoint[currentTurnPoint + 1], position2: enemyData.enemies[enemyIndex].position)
+                    sameTurnPointEnemies.append((index: enemyIndex, distance: distance))
+                } else {
+                    sameTurnPointEnemies.append((index: enemyIndex, distance: 0)) // 对于最后一个 turnPoint，距离设为 0
+                }
+                i += 1
+            }
+            sameTurnPointEnemies.sort { $0.distance < $1.distance }
+            enemyOrder.append(contentsOf: sameTurnPointEnemies.map { $0.index })
+        }
+        return enemyOrder
+    }
+
+    func getDistance(position1: (Double, Double), position2: (Double, Double)) -> Double {
+        return sqrt(pow(position1.0 - position2.0, 2) + pow(position1.1 - position2.1, 2))
+    }
+
     func getRotateAngle(towerPostionInt:(Int,Int),enemyPosition:(Double,Double)) -> Double{
         let towerPosition: (Double,Double) = getRealPosition(position: towerPostionInt)
         let deltaX = towerPosition.0 - enemyPosition.0
@@ -121,17 +154,22 @@ struct ContentView: View {
         return angleInDegrees
     }
     func moveEnemies(){
-        for i in enemyData.enemies.indices {
+        for i in enemyData.enemies.indices.reversed() {
             let enemy = enemyData.enemies[i]
-            switch(isEnemyInPath(enemyPostion: enemy.position, lastTurnPointIndex: lastTurnPoint[i])){
-                case 1: enemy.position.1 -= enemy.speed
-                case 2: enemy.position.1 += enemy.speed
-                case 3: enemy.position.0 += enemy.speed
-                case 4: enemy.position.0 -= enemy.speed
-                case 0: lastTurnPoint[i] += 1
-                default: if let index = enemyData.enemies.firstIndex(of: enemy){
-                    enemyData.enemies.remove(at: index);
-                }
+            switch(isEnemyInPath(enemyPostion: enemy.position, lastTurnPointIndex: lastTurnPoint[i])) {
+                case 1:
+                    enemy.position.1 -= enemy.speed
+                case 2:
+                    enemy.position.1 += enemy.speed
+                case 3:
+                    enemy.position.0 += enemy.speed
+                case 4:
+                    enemy.position.0 -= enemy.speed
+                case 0:
+                    lastTurnPoint[i] += 1
+                default:
+                    enemyData.enemies.remove(at: i)
+                    lastTurnPoint.remove(at: i)
             }
         }
     }
