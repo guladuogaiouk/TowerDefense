@@ -14,18 +14,34 @@ struct TowerView: View {
     var originalHP: Int {
         return tower.hp
     }
+    
     private var width: Double {
-        return ScreenSize.cellScale * 0.8
+        if tower is AttackerTower {
+            return cellWidth * 0.9
+        }else if tower is ProducerTower{
+            return cellWidth * 0.7
+        }
+        return cellWidth * 0.8
     }
+
     var body: some View {
         ZStack(alignment: .top){
             Image(tower.img)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .rotationEffect(Angle(degrees: angle))
-            showHpbar ? HPbarView(total: originalHP, now: tower.hp, width: width)
-                .frame(width: width)
-            : nil
-        }.frame(width: cellWidth * 0.8,height: cellHeight * 0.8)
+            if showHpbar {
+                HPbarView(total: originalHP, now: tower.hp, width: width)
+                    .frame(width: width)
+            }
+        }
+        .frame(width: width, height: width)
+        .onAppear(){
+            if let producerTower = tower as? ProducerTower {
+                withAnimation(.linear(duration: producerTower.produceInterval).repeatForever(autoreverses: false)) {
+                    angle = 360
+                }
+            }
+        }
     }
 }

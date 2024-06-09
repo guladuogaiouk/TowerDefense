@@ -19,6 +19,7 @@ struct TowerDefenseApp: App {
                 .environmentObject(towerData)
                 .environmentObject(towerCardViews)
                 .environmentObject(coveredCells)
+                .environmentObject(MoneyManager.shared)
         }
     }
 }

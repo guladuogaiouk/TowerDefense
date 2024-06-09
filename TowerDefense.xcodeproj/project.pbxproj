@@ -17,6 +17,7 @@
 		581DF9542C11FA83002A0E59 /* BossEnemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 581DF9532C11FA83002A0E59 /* BossEnemy.swift */; };
 		58AC5D0A2C1456F80060EE81 /* ObservableObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AC5D092C1456F80060EE81 /* ObservableObjects.swift */; };
 		58AC5D0C2C14576A0060EE81 /* BorningPointView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AC5D0B2C14576A0060EE81 /* BorningPointView.swift */; };
+		58AC5D0E2C157E530060EE81 /* ProducerTower.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AC5D0D2C157E530060EE81 /* ProducerTower.swift */; };
 		58D40ACF2C109F9D00DCF246 /* TowerDefenseApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D40ACE2C109F9D00DCF246 /* TowerDefenseApp.swift */; };
 		58D40AD12C109F9D00DCF246 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D40AD02C109F9D00DCF246 /* ContentView.swift */; };
 		58D40AD32C109F9F00DCF246 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 58D40AD22C109F9F00DCF246 /* Assets.xcassets */; };
@@ -36,6 +37,7 @@
 		581DF9532C11FA83002A0E59 /* BossEnemy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BossEnemy.swift; sourceTree = "<group>"; };
 		58AC5D092C1456F80060EE81 /* ObservableObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObservableObjects.swift; sourceTree = "<group>"; };
 		58AC5D0B2C14576A0060EE81 /* BorningPointView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BorningPointView.swift; sourceTree = "<group>"; };
+		58AC5D0D2C157E530060EE81 /* ProducerTower.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProducerTower.swift; sourceTree = "<group>"; };
 		58D40ACB2C109F9D00DCF246 /* TowerDefense.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TowerDefense.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		58D40ACE2C109F9D00DCF246 /* TowerDefenseApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TowerDefenseApp.swift; sourceTree = "<group>"; };
 		58D40AD02C109F9D00DCF246 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -80,6 +82,7 @@
 			isa = PBXGroup;
 			children = (
 				581DF9272C115DD6002A0E59 /* AttackerTower.swift */,
+				58AC5D0D2C157E530060EE81 /* ProducerTower.swift */,
 			);
 			path = Towertype;
 			sourceTree = "<group>";
@@ -222,6 +225,7 @@
 				58D40ACF2C109F9D00DCF246 /* TowerDefenseApp.swift in Sources */,
 				581DF9282C115DD6002A0E59 /* AttackerTower.swift in Sources */,
 				581421092C143C4200B67BA9 /* SideButtonView.swift in Sources */,
+				58AC5D0E2C157E530060EE81 /* ProducerTower.swift in Sources */,
 				58D40ADF2C10A2DA00DCF246 /* Tower.swift in Sources */,
 				581421072C12B85B00B67BA9 /* AttackerEmemy.swift in Sources */,
 				581DF92B2C115EEC002A0E59 /* Bullets.swift in Sources */,

@@ -7,10 +7,10 @@
 
 import Foundation
 class AttackerEnemy: Enemy{
-    var attack: Int = 25
-    var range: Int = 3
-    init(name: String, speed: Double, hp: Int, value: Int, position: (Double,Double), level: Int) {
-        let img = "\(name).\(level)"
-        super.init(name: name, speed: speed, hp: hp, value: value, position: position, img: img,level: level)
+    var range: Int{
+        return 1
+    }
+    override init(name: String, position: (Double,Double), level: Int) {
+        super.init(name: name, position: position,level: level)
     }
 }

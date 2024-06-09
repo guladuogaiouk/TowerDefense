@@ -11,7 +11,8 @@ var towerCards: [Tower] = [
     AttackerTower(name: "attacker1", level: 1, position: (0,0)),
     AttackerTower(name: "attacker2", level: 1, position: (0,0)),
     AttackerTower(name: "attacker3", level: 1, position: (0,0)),
-    AttackerTower(name: "attacker4", level: 1, position: (0,0))
+    AttackerTower(name: "attacker4", level: 1, position: (0,0)),
+    ProducerTower(name: "producer1", level: 1, position: (0,0),isCard: true)
 ]
 var turnPoint: [(Double,Double)] = []
 var lastTurnPoint: [Int] = []
@@ -40,19 +41,19 @@ struct ContentView: View {
     @EnvironmentObject var towerData: TowerData
     @EnvironmentObject var towerCardViews: TowerCardViews
     @EnvironmentObject var coveredCells: CoveredCells
+    @ObservedObject var moneyManager = MoneyManager.shared
     @State var isCardClicked: Bool = false
     @State var selectedTower: Tower? = nil
-    @State var money: Int = 2000
     @State var trigger: [Bool] = []
     @State var towerRotateAngles: [Double] = []
     let timer = Timer.publish(every: 0.016, on: .main, in: .common).autoconnect()
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                HeaderView(isCardClicked: $isCardClicked,selectedTower: $selectedTower,money: $money)
+                HeaderView(isCardClicked: $isCardClicked,selectedTower: $selectedTower)
                     .frame(height: cellHeight * 1.0)
                 ZStack{
-                    GridView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, trigger: $trigger, towerRotateAngles: $towerRotateAngles, path: path)
+                    GridView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, trigger: $trigger, towerRotateAngles: $towerRotateAngles, path: path)
                     BorningPointView()
                         .position(x:getRealPosition(position: path[0]).0, y: getRealPosition(position: path[0]).1)
                     ForEach(enemyData.enemies){enemy in
@@ -72,7 +73,7 @@ struct ContentView: View {
                         let tower = towerData.towers[index]
                         let realPosition = getRealPosition(position: tower.position)
                         trigger[index] == true ?
-                        SideButtonView(money: $money, tower: tower)
+                        SideButtonView(tower: tower)
                             .position(x: realPosition.0,y:realPosition.1)
                         : nil
                     }
@@ -112,6 +113,9 @@ struct ContentView: View {
                     }
                 }
             }
+//            if let producerTower = tower as? ProducerTower{
+//                
+//            }
         }
     }
     func getAllEnemiesOrder() -> [Int] {
@@ -240,7 +244,7 @@ struct ContentView: View {
     struct HeaderView: View {
         @Binding var isCardClicked: Bool
         @Binding var selectedTower: Tower?
-        @Binding var money: Int
+        @EnvironmentObject var moneyManager: MoneyManager
         @EnvironmentObject var towerCardViews: TowerCardViews
         func clickTowerCard(tower: Tower){
             if selectedTower != nil{
@@ -262,7 +266,7 @@ struct ContentView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 30, height: 30)
-                    Text("\(money)")
+                    Text("\(moneyManager.money)")
                         .font(.title)
                         .fontWeight(.bold)
                 }
@@ -293,7 +297,7 @@ struct ContentView: View {
                                 }
                                 .overlay(
                                     Group {
-                                        if money < tower.price {
+                                        if moneyManager.money < tower.price {
                                             Rectangle()
                                                 .fill(Color.black.opacity(0.6))
                                                 .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
@@ -319,7 +323,6 @@ struct ContentView: View {
     struct GridView: View {
         @Binding var isCardClicked: Bool
         @Binding var selectedTower: Tower?
-        @Binding var money: Int
         @Binding var trigger: [Bool]
         @Binding var towerRotateAngles: [Double]
         var path: [(Int, Int)]
@@ -329,7 +332,7 @@ struct ContentView: View {
                     HStack(spacing: 0) {
                         ForEach(0..<15, id: \.self) { column in
                             let isPathCell = path.contains(where: { $0 == (column + 1, 9 - row) })
-                            CellView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, money: $money, trigger: $trigger, towerRotateAngles: $towerRotateAngles, position: (column + 1, 9 - row), isPathCell: isPathCell)
+                            CellView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, trigger: $trigger, towerRotateAngles: $towerRotateAngles, position: (column + 1, 9 - row), isPathCell: isPathCell)
                         }
                     }
                 }
@@ -340,12 +343,12 @@ struct ContentView: View {
     struct CellView: View {
         @Binding var isCardClicked: Bool
         @Binding var selectedTower: Tower?
-        @Binding var money: Int
         @Binding var trigger: [Bool]
         @Binding var towerRotateAngles: [Double]
         @EnvironmentObject var towerData: TowerData
         @EnvironmentObject var towerCardViews: TowerCardViews
         @EnvironmentObject var coveredCells: CoveredCells
+        @EnvironmentObject var moneyManager: MoneyManager
         var position: (Int,Int)
         var isPathCell: Bool
         var body: some View {
@@ -368,7 +371,7 @@ struct ContentView: View {
         func layoutTower(){
             if let selectedTower = selectedTower {
                 let newTower = selectedTower.createCopy(at: position)
-                money -= newTower.price
+                moneyManager.money -= newTower.price
                 towerData.towers.append(newTower)
                 trigger.append(false)
                 towerRotateAngles.append(-90)

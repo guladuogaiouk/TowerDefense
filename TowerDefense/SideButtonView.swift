@@ -10,7 +10,7 @@ import SwiftUI
 struct SideButtonView: View {
     @EnvironmentObject var towerData: TowerData
     @EnvironmentObject var coveredCells: CoveredCells
-    @Binding var money: Int
+    @EnvironmentObject var moneyManager: MoneyManager
     var tower: Tower
     var body: some View {
         ZStack{
@@ -34,7 +34,7 @@ struct SideButtonView: View {
                                     .font(.footnote)
                             }
                         }
-                    } else if money > tower.price {
+                    } else if moneyManager.money > tower.price {
                         ZStack {
                             RoundedRectangle(cornerRadius: 2).fill(Color.green.opacity(0.6))
                                 .frame(width: cellWidth * 0.4, height: cellHeight * 0.65)
@@ -48,7 +48,7 @@ struct SideButtonView: View {
                         }
                         .onTapGesture {
                             if let index = towerData.towers.firstIndex(of: tower){
-                                money -= towerData.towers[index].costToNextLevel
+                                moneyManager.money -= towerData.towers[index].costToNextLevel
                                 towerData.towers[index].level += 1
                             }
                             
@@ -83,7 +83,6 @@ struct SideButtonView: View {
                 .offset(x:cellWidth * 0.6)
             }
         }
-        
     }
 }
 //
