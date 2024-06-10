@@ -15,14 +15,10 @@ class Enemy: Identifiable,Equatable,ObservableObject{
     }
     let id: UUID
     var name: String
-    var speed: Double{
-        return 1.0
-    }
-    var radius: Double{
-        return cellWidth * 0.4
-    }
-    let originalHp: Int
-    var hp: Int
+    var speed: Double = 1.0
+    var radius: Double = cellWidth * 0.3
+    var originalHp: Int = 100
+    var hp: Int = 100
     var position: (Double,Double)
     var img: String{
         return "\(name).\(level)"
@@ -34,7 +30,26 @@ class Enemy: Identifiable,Equatable,ObservableObject{
         self.name = name
         self.position = position
         self.level = level
-        self.originalHp = 100
+        switch(name){
+            case "shield1" :
+                self.speed = 1.0
+                self.radius = cellWidth * 0.35
+                switch(level){
+                    case 1: self.originalHp = 100
+                    case 2: self.originalHp = 200
+                    case 3: self.originalHp = 300
+                    default: break
+                }
+            case "boss1":
+            self.speed = 0.8
+                self.radius = cellWidth * 0.45
+                switch(level){
+                    case 1: self.originalHp = 500
+                    case 2: self.originalHp = 1000
+                    default: break
+                }
+            default: break
+        }
         self.hp = self.originalHp
     }
 }

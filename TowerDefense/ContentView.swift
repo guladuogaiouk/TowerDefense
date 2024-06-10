@@ -34,7 +34,7 @@ struct ContentView: View {
     @State var selectedTower: Tower? = nil
     @State var trigger: [Bool] = []
     @State var towerRotateAngles: [Double] = []
-    let timer = Timer.publish(every: 0.016, on: .main, in: .common).autoconnect()
+    var timer = Timer.publish(every: 0.016, on: .main, in: .common).autoconnect()
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
@@ -114,13 +114,18 @@ struct ContentView: View {
                     }
                 }
             }
-        }
+                let delta_X = bullet.flySpeed * 0.016 * cos(bullet.angle)
+                let delta_Y = bullet.flySpeed * 0.016 * sin(bullet.angle)
+                bullet.initPosition = (bullet.initPosition.0 - delta_X, bullet.initPosition.1 - delta_Y)
+            }else{
+                bulletData.bullets.remove(at: bulletIndex)
+            }
         if(bullet.initPosition.0 > ScreenSize.width || bullet.initPosition.0 < 0 || bullet.initPosition.1 > ScreenSize.height || bullet.initPosition.1 < 0){
             bulletData.bullets.remove(at: bulletIndex)
         }
-        let delta_X = bullet.flySpeed * 0.016 * cos(bullet.angle)
-        let delta_Y = bullet.flySpeed * 0.016 * sin(bullet.angle)
-        bullet.initPosition = (bullet.initPosition.0 - delta_X, bullet.initPosition.1 - delta_Y)
+//        let delta_X = bullet.flySpeed * 0.016 * cos(bullet.angle)
+//        let delta_Y = bullet.flySpeed * 0.016 * sin(bullet.angle)
+//        bullet.initPosition = (bullet.initPosition.0 - delta_X, bullet.initPosition.1 - delta_Y)
     }
     func rotateTowers() {
         for i in towerData.towers.indices {
@@ -128,16 +133,28 @@ struct ContentView: View {
             if let attackerTower = tower as? AttackerTower {
                 let range = getRealLength(length: attackerTower.range) + 2
                 var enemyInRange = false
+
                 for j in getAllEnemiesOrder() {
                     let enemy = enemyData.enemies[j]
                     if getRealDistance(towerPositionInt: attackerTower.position, enemyPosition: enemy.position) <= range {
                         towerRotateAngles[i] = getRotateAngle(towerPostionInt: attackerTower.position, enemyPosition: enemy.position)
                         if attackerTimers[i] == nil {
+                            attackerTower.currentEnemy = enemy.id
                             attackerTimers[i] = Timer.scheduledTimer(withTimeInterval: attackerTower.attackSpeed, repeats: true) { _ in
                                 let realPosition = getRealPosition(position: attackerTower.position)
                                 let adjustedAngle = towerRotateAngles[i] / 180 * .pi
-                                let bulletInitPosition: (Double, Double) = (realPosition.0 - attackerTower.radius * cos(adjustedAngle),realPosition.1 - attackerTower.radius * sin(adjustedAngle))
-                                bulletData.bullets.append(Bullet(initPosition: bulletInitPosition, towerIndex: i, targetId: enemy.id, targetPosition: enemy.position))
+                                let bulletInitPosition: (Double, Double) = (realPosition.0 - attackerTower.radius * cos(adjustedAngle), realPosition.1 - attackerTower.radius * sin(adjustedAngle))
+                                bulletData.bullets.append(Bullet(initPosition: bulletInitPosition, targetId: enemy.id, name: attackerTower.name, level: attackerTower.level))
+                            }
+                        } else if attackerTower.currentEnemy != enemy.id {
+                            attackerTimers[i]?.invalidate()
+                            attackerTimers[i] = nil
+                            attackerTower.currentEnemy = enemy.id
+                            attackerTimers[i] = Timer.scheduledTimer(withTimeInterval: attackerTower.attackSpeed, repeats: true) { _ in
+                                let realPosition = getRealPosition(position: attackerTower.position)
+                                let adjustedAngle = towerRotateAngles[i] / 180 * .pi
+                                let bulletInitPosition: (Double, Double) = (realPosition.0 - attackerTower.radius * cos(adjustedAngle), realPosition.1 - attackerTower.radius * sin(adjustedAngle))
+                                bulletData.bullets.append(Bullet(initPosition: bulletInitPosition, targetId: enemy.id, name: attackerTower.name, level: attackerTower.level))
                             }
                         }
                         enemyInRange = true
@@ -147,10 +164,12 @@ struct ContentView: View {
                 if !enemyInRange {
                     attackerTimers[i]?.invalidate()
                     attackerTimers[i] = nil
+                    attackerTower.currentEnemy = nil
                 }
             }
         }
     }
+
 
     func getAllEnemiesOrder() -> [Int] {
         var enemyOrder: [Int] = []
@@ -179,17 +198,7 @@ struct ContentView: View {
         return enemyOrder
     }
 
-    func getDistance(position1: (Double, Double), position2: (Double, Double)) -> Double {
-        return sqrt(pow(position1.0 - position2.0, 2) + pow(position1.1 - position2.1, 2))
-    }
     
-    func getAngle(position1:(Double,Double),position2:(Double,Double)) -> Double{
-        let deltaX = position1.0 - position2.0
-        let deltaY = position1.1 - position2.1
-        let angle = atan2(deltaY, deltaX)
-        let angleInDegrees = angle * 180 / .pi
-        return angleInDegrees
-    }
     func getRotateAngle(towerPostionInt:(Int,Int),enemyPosition:(Double,Double)) -> Double{
         let towerPosition: (Double,Double) = getRealPosition(position: towerPostionInt)
         return getAngle(position1: towerPosition, position2: enemyPosition)
@@ -249,9 +258,14 @@ struct ContentView: View {
     }
     func initVariables() {
         turnPoint = getTurnPoint(path: path)
-        for i in enemyData.enemies.indices {
-            enemyData.enemies[i].position = turnPoint[0]
-            lastTurnPoint.append(0)
+        var index = 0
+        _ = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
+            if index < enemies.count {
+                enemyData.enemies.append(enemies[index])
+                enemyData.enemies[enemyData.enemies.count - 1].position = turnPoint[0]
+                lastTurnPoint.append(0)
+                index += 1
+            }
         }
         for i in towerData.towers.indices {
             towerData.towers[i].position = (towerData.towers[i].position.0, towerData.towers[i].position.1)

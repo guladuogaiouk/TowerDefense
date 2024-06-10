@@ -18,8 +18,8 @@ func getRealPosition(position: (Int, Int)) -> (Double, Double) {
     let real_y = Double(10 - position.1) * cellHeight - cellHeight / 2
     return (real_x, real_y)
 }
-func getRealLength(length: Int)->Double{
-    return Double(length) * cellWidth
+func getRealLength(length: Double)->Double{
+    return length * cellWidth
 }
 func addMoney(deltaMoney: Int){
     if  MoneyManager.shared.money == 9999{
@@ -27,6 +27,12 @@ func addMoney(deltaMoney: Int){
     }else{
         MoneyManager.shared.money = min(MoneyManager.shared.money + deltaMoney,9999)
     }
-    
-    
+}
+
+func getAngle(position1:(Double,Double),position2:(Double,Double)) -> Double{
+    let deltaX = position1.0 - position2.0
+    let deltaY = position1.1 - position2.1
+    let angle = atan2(deltaY, deltaX)
+    let angleInDegrees = angle * 180 / .pi
+    return angleInDegrees
 }

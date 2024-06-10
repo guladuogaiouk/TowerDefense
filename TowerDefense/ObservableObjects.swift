@@ -7,23 +7,24 @@
 
 import Foundation
 import SwiftUI
-
+var enemies: [Enemy] = [
+    AttackerEnemy(name: "shield1", position: (0, 0), level: 1),
+    AttackerEnemy(name: "shield1", position: (0, 0), level: 1),
+    AttackerEnemy(name: "shield1", position: (0, 0), level: 1),
+    AttackerEnemy(name: "shield1", position: (0, 0), level: 2),
+    AttackerEnemy(name: "shield1", position: (0, 0), level: 2),
+    AttackerEnemy(name: "shield1", position: (0, 0), level: 3),
+    BossAttackEnemy(name: "boss1", position: (0, 0), level: 1),
+    BossAttackEnemy(name: "boss1", position: (0, 0), level: 2)
+]
 class CoveredCells: ObservableObject{
     @Published var coveredCells: [(Int,Int)] = []
 }
-//class MoneyManager: ObservableObject{
-//    @Published var money: Int = 0
-//}
 class TowerData: ObservableObject{
     @Published var towers: [Tower] = []
 }
 class EnemyData: ObservableObject {
-    @Published var enemies: [Enemy] = [
-//        AttackerEnemy(name: "shield1", position: (0, 0), level: 1),
-//        AttackerEnemy(name: "shield1", position: (0, 0), level: 2),
-//        AttackerEnemy(name: "shield1", position: (0, 0), level: 3),
-        BossAttackEnemy(name: "boss1", position: (0, 0), level: 1)
-    ]
+    @Published var enemies: [Enemy] = []
 }
 class BulletData: ObservableObject{
     @Published var bullets: [Bullet] = []
