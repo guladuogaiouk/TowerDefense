@@ -10,6 +10,9 @@ class AttackerEnemy: Enemy{
     var range: Int{
         return 1
     }
+    var attackInterval: TimeInterval{
+        return 0.2
+    }
     override init(name: String, position: (Double,Double), level: Int) {
         super.init(name: name, position: position,level: level)
     }

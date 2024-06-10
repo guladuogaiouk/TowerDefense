@@ -10,6 +10,9 @@ class AttackerTower: Tower {
     var range: Int{
         return 3
     }
+    var attackSpeed: Double{
+        return 0.2
+    }
     override init(name: String, level: Int, position: (Int,Int)) {
         super.init(name: name, level: level, position: position)
     }

@@ -16,25 +16,12 @@ var towerCards: [Tower] = [
 ]
 var turnPoint: [(Double,Double)] = []
 var lastTurnPoint: [Int] = []
+var attackerTimers: [Timer?] = []
 
 class TowerCardViews: ObservableObject{
     @Published var towerCardViews: [TowerCardView] = []
 }
-func getDistance(position1:(Double,Double),position2:(Double,Double))->Double{
-    return sqrt(pow(position1.0-position2.0, 2) + pow(position1.1-position2.1, 2))
-}
-func getRealDistance(towerPositionInt: (Int,Int), enemyPosition:(Double,Double))->Double{
-    let towerPosition = getRealPosition(position: towerPositionInt)
-    return getDistance(position1: towerPosition, position2: enemyPosition)
-}
-func getRealPosition(position: (Int, Int)) -> (Double, Double) {
-    let real_x = Double(position.0) * cellWidth - cellWidth / 2
-    let real_y = Double(10 - position.1) * cellHeight - cellHeight / 2
-    return (real_x, real_y)
-}
-func getRealLength(length: Int)->Double{
-    return Double(length) * cellWidth
-}
+
 
 struct ContentView: View {
     @StateObject var enemyData = EnemyData()
@@ -42,6 +29,7 @@ struct ContentView: View {
     @EnvironmentObject var towerCardViews: TowerCardViews
     @EnvironmentObject var coveredCells: CoveredCells
     @ObservedObject var moneyManager = MoneyManager.shared
+    @EnvironmentObject var bulletData: BulletData
     @State var isCardClicked: Bool = false
     @State var selectedTower: Tower? = nil
     @State var trigger: [Bool] = []
@@ -69,6 +57,11 @@ struct ContentView: View {
                                 trigger[index] = true
                             }
                     }
+                    ForEach(bulletData.bullets.indices, id:\.self){ index in
+                        let bullet = bulletData.bullets[index]
+                        BulletView(bullet: bullet)
+                            .position(x:bullet.initPosition.0,y:bullet.initPosition.1)
+                    }
                     ForEach(towerData.towers.indices, id:\.self){ index in
                         let tower = towerData.towers[index]
                         let realPosition = getRealPosition(position: tower.position)
@@ -95,29 +88,70 @@ struct ContentView: View {
                 }
             )
             .onReceive(timer) { _ in
+//                print("1")
                 moveEnemies()
                 rotateTowers()
+                moveBullets()
             }
         }
     }
-    func rotateTowers(){
-        for i in towerData.towers.indices{
-            let tower = towerData.towers[i]
-            if let attackerTower = tower as? AttackerTower {
-                let range = getRealLength(length: attackerTower.range) + 2
-                for j in getAllEnemiesOrder() {
-                    let enemy = enemyData.enemies[j]
-                    if getRealDistance(towerPositionInt: attackerTower.position, enemyPosition: enemy.position) <= range{
-                        towerRotateAngles[i] = getRotateAngle(towerPostionInt: attackerTower.position, enemyPosition: enemy.position)
-                        break
+    func moveBullets(){
+        for i in bulletData.bullets.indices.reversed(){
+            moveBullet(bulletIndex: i)
+        }
+    }
+    func moveBullet(bulletIndex: Int){
+        let bullet = bulletData.bullets[bulletIndex]
+        if let enemy = enemyData.enemies.first(where: { $0.id == bullet.targetId }) {
+            bullet.angle = getAngle(position1: bullet.initPosition, position2: enemy.position) / 180 * .pi
+            if(getDistance(position1: bullet.initPosition, position2: enemy.position) <= enemy.radius){
+                bulletData.bullets.remove(at: bulletIndex)
+                enemy.hp -= bullet.attackValue
+                if(enemy.hp <= 0){
+                    if let index = enemyData.enemies.firstIndex(of: enemy){
+                        enemyData.enemies.remove(at: index)
+                        lastTurnPoint.remove(at: index)
                     }
                 }
             }
-//            if let producerTower = tower as? ProducerTower{
-//                
-//            }
+        }
+        if(bullet.initPosition.0 > ScreenSize.width || bullet.initPosition.0 < 0 || bullet.initPosition.1 > ScreenSize.height || bullet.initPosition.1 < 0){
+            bulletData.bullets.remove(at: bulletIndex)
+        }
+        let delta_X = bullet.flySpeed * 0.016 * cos(bullet.angle)
+        let delta_Y = bullet.flySpeed * 0.016 * sin(bullet.angle)
+        bullet.initPosition = (bullet.initPosition.0 - delta_X, bullet.initPosition.1 - delta_Y)
+    }
+    func rotateTowers() {
+        for i in towerData.towers.indices {
+            let tower = towerData.towers[i]
+            if let attackerTower = tower as? AttackerTower {
+                let range = getRealLength(length: attackerTower.range) + 2
+                var enemyInRange = false
+                for j in getAllEnemiesOrder() {
+                    let enemy = enemyData.enemies[j]
+                    if getRealDistance(towerPositionInt: attackerTower.position, enemyPosition: enemy.position) <= range {
+                        towerRotateAngles[i] = getRotateAngle(towerPostionInt: attackerTower.position, enemyPosition: enemy.position)
+                        if attackerTimers[i] == nil {
+                            attackerTimers[i] = Timer.scheduledTimer(withTimeInterval: attackerTower.attackSpeed, repeats: true) { _ in
+                                let realPosition = getRealPosition(position: attackerTower.position)
+                                let adjustedAngle = towerRotateAngles[i] / 180 * .pi
+                                let bulletInitPosition: (Double, Double) = (realPosition.0 - attackerTower.radius * cos(adjustedAngle),realPosition.1 - attackerTower.radius * sin(adjustedAngle))
+                                bulletData.bullets.append(Bullet(initPosition: bulletInitPosition, towerIndex: i, targetId: enemy.id, targetPosition: enemy.position))
+                            }
+                        }
+                        enemyInRange = true
+                        break
+                    }
+                }
+                if !enemyInRange {
+                    attackerTimers[i]?.invalidate()
+                    attackerTimers[i] = nil
+                }
+            }
         }
     }
+
     func getAllEnemiesOrder() -> [Int] {
         var enemyOrder: [Int] = []
         var indexedEnemies: [(index: Int, turnPoint: Int)] = []
@@ -148,14 +182,17 @@ struct ContentView: View {
     func getDistance(position1: (Double, Double), position2: (Double, Double)) -> Double {
         return sqrt(pow(position1.0 - position2.0, 2) + pow(position1.1 - position2.1, 2))
     }
-
-    func getRotateAngle(towerPostionInt:(Int,Int),enemyPosition:(Double,Double)) -> Double{
-        let towerPosition: (Double,Double) = getRealPosition(position: towerPostionInt)
-        let deltaX = towerPosition.0 - enemyPosition.0
-        let deltaY = towerPosition.1 - enemyPosition.1
+    
+    func getAngle(position1:(Double,Double),position2:(Double,Double)) -> Double{
+        let deltaX = position1.0 - position2.0
+        let deltaY = position1.1 - position2.1
         let angle = atan2(deltaY, deltaX)
         let angleInDegrees = angle * 180 / .pi
         return angleInDegrees
+    }
+    func getRotateAngle(towerPostionInt:(Int,Int),enemyPosition:(Double,Double)) -> Double{
+        let towerPosition: (Double,Double) = getRealPosition(position: towerPostionInt)
+        return getAngle(position1: towerPosition, position2: enemyPosition)
     }
     func moveEnemies(){
         for i in enemyData.enemies.indices.reversed() {
@@ -376,6 +413,7 @@ struct ContentView: View {
                 trigger.append(false)
                 towerRotateAngles.append(-90)
                 coveredCells.coveredCells.append(position)
+                attackerTimers.append(nil)
                 isCardClicked = false
                 for towercard in towerCardViews.towerCardViews{
                     if(towercard.viewModel.tower == selectedTower){

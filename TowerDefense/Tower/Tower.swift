@@ -8,6 +8,9 @@ class Tower: Identifiable, Equatable {
     
     let id: UUID
     var name: String
+    var radius: Double{
+        return cellWidth * 0.45
+    }
     var hp: Int {
         return 100
     }

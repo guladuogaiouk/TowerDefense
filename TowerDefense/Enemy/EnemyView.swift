@@ -1,15 +1,13 @@
 import SwiftUI
 
 struct EnemyView: View {
-    var enemy: Enemy
-    var originalHP: Int {
-        return enemy.hp
+    @ObservedObject var enemy: Enemy
+    var originalHP: Int{
+        return enemy.originalHp
     }
-//    var originalHP = 200
     private var width: Double {
-        return enemy.name.starts(with: "shield") ? ScreenSize.cellScale * 0.7 : ScreenSize.cellScale * 1.1
+        return enemy.radius * 2
     }
-    
     var body: some View {
         VStack {
             HPbarView(total: originalHP, now: enemy.hp, width: width)
@@ -28,10 +26,12 @@ struct HPbarView: View {
     var now: Int
     var width: Double
     var body: some View {
-        ProgressView(value: Float(now), total: Float(total))
-            .progressViewStyle(HPProgressViewStyle(width: width))
-            .frame(height: 4)
-            .padding(.horizontal)
+        if now > 0 {
+            ProgressView(value: Float(now), total: Float(total))
+                .progressViewStyle(HPProgressViewStyle(width: width))
+                .frame(height: 4)
+                .padding(.horizontal)
+        }
     }
 }
 

@@ -12,6 +12,7 @@ struct TowerDefenseApp: App {
     @StateObject private var towerData = TowerData()
     @StateObject private var towerCardViews = TowerCardViews()
     @StateObject private var coveredCells = CoveredCells()
+    @StateObject private var bulletData = BulletData()
     
     var body: some Scene {
         WindowGroup {
@@ -20,6 +21,7 @@ struct TowerDefenseApp: App {
                 .environmentObject(towerCardViews)
                 .environmentObject(coveredCells)
                 .environmentObject(MoneyManager.shared)
+                .environmentObject(bulletData)
         }
     }
 }

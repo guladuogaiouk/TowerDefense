@@ -16,12 +16,7 @@ struct TowerView: View {
     }
     
     private var width: Double {
-        if tower is AttackerTower {
-            return cellWidth * 0.9
-        }else if tower is ProducerTower{
-            return cellWidth * 0.7
-        }
-        return cellWidth * 0.8
+        return tower.radius * 2
     }
 
     var body: some View {

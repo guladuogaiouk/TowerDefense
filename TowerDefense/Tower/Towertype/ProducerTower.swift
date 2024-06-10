@@ -39,7 +39,7 @@ class ProducerTower: Tower {
 
     private func produceMoney() {
         self.img = "\(self.name).\(self.level).activated"
-        moneyManager.money += increasedMoney
+        addMoney(deltaMoney: increasedMoney)
         self.activatedTimer?.invalidate()
         self.activatedTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { [weak self] _ in
             if let self = self {

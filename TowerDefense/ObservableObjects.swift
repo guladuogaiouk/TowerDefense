@@ -19,11 +19,14 @@ class TowerData: ObservableObject{
 }
 class EnemyData: ObservableObject {
     @Published var enemies: [Enemy] = [
-        AttackerEnemy(name: "shield1", position: (0, 0), level: 1),
-        AttackerEnemy(name: "shield1", position: (0, 0), level: 2),
-        AttackerEnemy(name: "shield1", position: (0, 0), level: 3),
+//        AttackerEnemy(name: "shield1", position: (0, 0), level: 1),
+//        AttackerEnemy(name: "shield1", position: (0, 0), level: 2),
+//        AttackerEnemy(name: "shield1", position: (0, 0), level: 3),
         BossAttackEnemy(name: "boss1", position: (0, 0), level: 1)
     ]
+}
+class BulletData: ObservableObject{
+    @Published var bullets: [Bullet] = []
 }
 class MoneyManager: ObservableObject {
     static let shared = MoneyManager()
