@@ -28,6 +28,7 @@ class EnemyData: ObservableObject {
 }
 class BulletData: ObservableObject{
     @Published var bullets: [Bullet] = []
+    @Published var rangeBullets: [RangeBullet] = []
 }
 class MoneyManager: ObservableObject {
     static let shared = MoneyManager()

@@ -50,7 +50,10 @@ struct SideButtonView: View {
                             if let index = towerData.towers.firstIndex(of: tower){
                                 moneyManager.money -= towerData.towers[index].costToNextLevel
                                 towerData.towers[index].level += 1
+                                attackerTimers[index]?.invalidate()
+                                attackerTimers[index] = nil
                             }
+                           
                             
                         }
                     } else {
@@ -74,10 +77,14 @@ struct SideButtonView: View {
                             .frame(width: cellWidth * 0.25,height: cellHeight * 0.25)
                     }
                     .onTapGesture {
+//                        lastTurnPoint.remove(at: towerData.towers.firstIndex(of: tower)!)
+                        attackerTimers[towerData.towers.firstIndex(of: tower)!]?.invalidate()
+                        attackerTimers.remove(at: towerData.towers.firstIndex(of: tower)!)
                         towerData.towers.remove(at:towerData.towers.firstIndex(of: tower)!)
                         if let index = coveredCells.coveredCells.firstIndex(where: { $0 == tower.position }) {
                             coveredCells.coveredCells.remove(at: index)
                         }
+                        
                     }
                 }
                 .offset(x:cellWidth * 0.6)

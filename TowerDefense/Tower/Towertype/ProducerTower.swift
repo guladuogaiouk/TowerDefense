@@ -21,7 +21,7 @@ class ProducerTower: Tower {
         return 0
     }
     var produceInterval: TimeInterval {
-        return 5
+        return 10
     }
     var timer: Timer?
     var activatedTimer: Timer?
