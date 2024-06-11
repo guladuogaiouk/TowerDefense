@@ -8,7 +8,7 @@
 import Foundation
 class BossAttackEnemy: AttackerEnemy{
     var upgradeHpPoint: Int = 50
-    override init(name: String, position: (Double,Double), level: Int) {
+    override init(name: String, position: (Double,Double) = (0,0), level: Int) {
         super.init(name: name, position: position, level: level)
     }
 }

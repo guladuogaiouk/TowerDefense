@@ -8,14 +8,14 @@
 import Foundation
 import SwiftUI
 var enemies: [Enemy] = [
-    AttackerEnemy(name: "shield1", position: (0, 0), level: 1),
-    AttackerEnemy(name: "shield1", position: (0, 0), level: 1),
-    AttackerEnemy(name: "shield1", position: (0, 0), level: 1),
-    AttackerEnemy(name: "shield1", position: (0, 0), level: 2),
-    AttackerEnemy(name: "shield1", position: (0, 0), level: 2),
-    AttackerEnemy(name: "shield1", position: (0, 0), level: 3),
-    BossAttackEnemy(name: "boss1", position: (0, 0), level: 1),
-    BossAttackEnemy(name: "boss1", position: (0, 0), level: 2)
+    AttackerEnemy(name: "shield1", level: 1),
+    AttackerEnemy(name: "shield1", level: 1),
+    AttackerEnemy(name: "shield1", level: 1),
+    AttackerEnemy(name: "shield1", level: 2),
+    AttackerEnemy(name: "shield1", level: 2),
+    AttackerEnemy(name: "shield1", level: 3),
+    BossAttackEnemy(name: "boss1", level: 1),
+    BossAttackEnemy(name: "boss1", level: 1)
 ]
 class CoveredCells: ObservableObject{
     @Published var coveredCells: [(Int,Int)] = []
