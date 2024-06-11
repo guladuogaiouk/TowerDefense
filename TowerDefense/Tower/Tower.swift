@@ -8,31 +8,26 @@ class Tower: Identifiable, Equatable {
     
     let id: UUID
     var name: String
-    var radius: Double{
-        return cellWidth * 0.45
-    }
+    var radius: Double = cellWidth * 0.45
     var hp: Int {
         return 100
     }
-    var price: Int {
-        return 100
-    }
-    var cd: Int {
-        return 10
-    }
+    var price: Int = 100
+    var cd: Int = 10
     var level: Int {
         didSet {
             img = "\(name).\(level)"
+            switch name {
+                case "attacker1": self.costToNextLevel = 100
+                case "attacker2": self.costToNextLevel = 150
+                case "attacker3": self.costToNextLevel = 150
+                case "attacker4": self.costToNextLevel = 200
+                case "producer1": self.costToNextLevel = 125
+                default: break;
+            }
         }
     }
-    var costToNextLevel: Int {
-        switch(level) {
-            case 1: return 50
-            case 2: return 100
-            case 3: return 0
-            default: return 0
-        }
-    }
+    var costToNextLevel: Int = 100
     var position: (Int, Int)
     var img: String
     
@@ -42,6 +37,30 @@ class Tower: Identifiable, Equatable {
         self.level = level
         self.position = position
         self.img = "\(name).\(level)"
+        switch name {
+            case "attacker1":
+                self.price = 50
+                self.cd = 5
+                self.costToNextLevel = 50
+            case "attacker2":
+                self.price = 150
+                self.cd = 10
+                self.costToNextLevel = 100
+            case "attacker3":
+                self.price = 125
+                self.cd = 15
+                self.costToNextLevel = 100
+            case "attacker4":
+                self.price = 125
+                self.cd = 10
+                self.costToNextLevel = 75
+            case "producer1":
+                self.price = 50
+                self.cd = 5
+                self.costToNextLevel = 50
+                self.radius = cellWidth * 0.4
+            default: break
+        }
     }
     
     func createCopy(at position: (Int, Int)) -> Tower {

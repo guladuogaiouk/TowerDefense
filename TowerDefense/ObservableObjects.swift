@@ -32,6 +32,7 @@ class TowerData: ObservableObject{
     @Published var towers: [Tower] = []
 }
 class EnemyData: ObservableObject {
+    static let shared = EnemyData()
     @Published var enemies: [Enemy] = []
 }
 class BulletData: ObservableObject{

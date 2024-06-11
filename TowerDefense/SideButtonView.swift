@@ -16,10 +16,14 @@ struct SideButtonView: View {
         ZStack{
             if let attackerTower = tower as? AttackerTower{
                 Circle()
-                    .fill(Color.blue.opacity(0.1))
-                    .stroke(Color.blue)
+                    .fill(Color.black.opacity(0.1))
+                    .stroke(Color.gray)
                     .frame(width: getRealLength(length: attackerTower.range) * 2,height: getRealLength(length: attackerTower.range) * 2)
             }
+            Text("Lv.\(tower.level)")
+                .foregroundStyle(Color.yellow)
+                .font(.callout)
+                .fontWeight(.bold)
             HStack{
                 VStack(spacing: 3){
                     if tower.level == 3 {
@@ -77,7 +81,6 @@ struct SideButtonView: View {
                             .frame(width: cellWidth * 0.25,height: cellHeight * 0.25)
                     }
                     .onTapGesture {
-//                        lastTurnPoint.remove(at: towerData.towers.firstIndex(of: tower)!)
                         attackerTimers[towerData.towers.firstIndex(of: tower)!]?.invalidate()
                         attackerTimers.remove(at: towerData.towers.firstIndex(of: tower)!)
                         towerData.towers.remove(at:towerData.towers.firstIndex(of: tower)!)

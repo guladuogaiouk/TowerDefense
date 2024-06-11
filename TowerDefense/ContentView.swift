@@ -25,7 +25,7 @@ class TowerCardViews: ObservableObject{
 
 
 struct ContentView: View {
-    @StateObject var enemyData = EnemyData()
+    @ObservedObject var enemyData = EnemyData.shared
     @EnvironmentObject var towerData: TowerData
     @EnvironmentObject var towerCardViews: TowerCardViews
     @EnvironmentObject var coveredCells: CoveredCells
@@ -43,8 +43,7 @@ struct ContentView: View {
                     .frame(height: cellHeight * 1.0)
                 ZStack{
                     GridView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, trigger: $trigger, towerRotateAngles: $towerRotateAngles, path: path)
-                    BorningPointView()
-                        .position(x:getRealPosition(position: path[0]).0, y: getRealPosition(position: path[0]).1)
+                    
                     ForEach(enemyData.enemies){enemy in
                         EnemyView(enemy: enemy)
                             .position(x: enemy.position.0, y: enemy.position.1)
@@ -76,7 +75,12 @@ struct ContentView: View {
                             .position(x: realPosition.0,y:realPosition.1)
                         : nil
                     }
-                    
+                    BorningPointView()
+                        .position(x:getRealPosition(position: path[0]).0, y: getRealPosition(position: path[0]).1)
+                        .offset(y: -cellWidth / 2)
+                    DestinationPointView()
+                        .position(x:getRealPosition(position: path[path.count - 1]).0, y: getRealPosition(position: path[path.count - 1]).1)
+                        .offset(y: -cellWidth / 2)
                 }
                 .frame(height: cellHeight * 9.0)
             }
@@ -111,12 +115,12 @@ struct ContentView: View {
                 for enemy in enemyData.enemies{
                     if (getDistance(position1: rangeBullet.initPosition, position2: enemy.position) - enemy.radius <= getRealLength(length: rangeBullet.range)){
                         enemy.hp -= rangeBullet.attackValue
-                        if enemy.hp <= 0 {
-                            if let index = enemyData.enemies.firstIndex(of: enemy){
-                                enemyData.enemies.remove(at: index)
-                                lastTurnPoint.remove(at: index)
-                            }
-                        }
+//                        if enemy.hp <= 0 {
+//                            if let index = enemyData.enemies.firstIndex(of: enemy){
+//                                enemyData.enemies.remove(at: index)
+//                                lastTurnPoint.remove(at: index)
+//                            }
+//                        }
                     }
                 }
             }
@@ -135,16 +139,18 @@ struct ContentView: View {
                 bulletData.bullets.remove(at: bulletIndex)
                 enemy.hp -= bullet.attackValue
                 if bullet.name == "attacker3"{
-//                    print("iced")
-//                    enemy
                     enemy.isIced = true
+                    enemy.isFired = false
+                }else if bullet.name == "attacker2"{
+                    enemy.isIced = false
+                    enemy.isFired = true
                 }
-                if(enemy.hp <= 0){
-                    if let index = enemyData.enemies.firstIndex(of: enemy){
-                        enemyData.enemies.remove(at: index)
-                        lastTurnPoint.remove(at: index)
-                    }
-                }
+//                if(enemy.hp <= 0){
+//                    if let index = enemyData.enemies.firstIndex(of: enemy){
+//                        enemyData.enemies.remove(at: index)
+//                        lastTurnPoint.remove(at: index)
+//                    }
+//                }
             }
                 let delta_X = bullet.flySpeed * 0.016 * cos(bullet.angle)
                 let delta_Y = bullet.flySpeed * 0.016 * sin(bullet.angle)
@@ -257,7 +263,7 @@ struct ContentView: View {
                     let distance = getDistance(position1: turnPoint[currentTurnPoint + 1], position2: enemyData.enemies[enemyIndex].position)
                     sameTurnPointEnemies.append((index: enemyIndex, distance: distance))
                 } else {
-                    sameTurnPointEnemies.append((index: enemyIndex, distance: 0)) // 对于最后一个 turnPoint，距离设为 0
+                    sameTurnPointEnemies.append((index: enemyIndex, distance: 0))
                 }
                 i += 1
             }

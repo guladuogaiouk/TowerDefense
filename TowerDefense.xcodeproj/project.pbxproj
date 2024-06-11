@@ -23,6 +23,7 @@
 		58AC5D142C1720680060EE81 /* RangeAttackerTower.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AC5D132C1720670060EE81 /* RangeAttackerTower.swift */; };
 		58AC5D162C1720CE0060EE81 /* RangeBullet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AC5D152C1720CE0060EE81 /* RangeBullet.swift */; };
 		58AC5D182C1721C10060EE81 /* RangeBulletView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AC5D172C1721C10060EE81 /* RangeBulletView.swift */; };
+		58AC5D1B2C184EF50060EE81 /* DestinationPointView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58AC5D1A2C184EF50060EE81 /* DestinationPointView.swift */; };
 		58D40ACF2C109F9D00DCF246 /* TowerDefenseApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D40ACE2C109F9D00DCF246 /* TowerDefenseApp.swift */; };
 		58D40AD12C109F9D00DCF246 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58D40AD02C109F9D00DCF246 /* ContentView.swift */; };
 		58D40AD32C109F9F00DCF246 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 58D40AD22C109F9F00DCF246 /* Assets.xcassets */; };
@@ -49,6 +50,7 @@
 		58AC5D152C1720CE0060EE81 /* RangeBullet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangeBullet.swift; sourceTree = "<group>"; };
 		58AC5D172C1721C10060EE81 /* RangeBulletView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RangeBulletView.swift; sourceTree = "<group>"; };
 		58AC5D192C17DE1F0060EE81 /* allData.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = allData.json; sourceTree = "<group>"; };
+		58AC5D1A2C184EF50060EE81 /* DestinationPointView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationPointView.swift; sourceTree = "<group>"; };
 		58D40ACB2C109F9D00DCF246 /* TowerDefense.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TowerDefense.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		58D40ACE2C109F9D00DCF246 /* TowerDefenseApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TowerDefenseApp.swift; sourceTree = "<group>"; };
 		58D40AD02C109F9D00DCF246 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -151,6 +153,7 @@
 				58AC5D0B2C14576A0060EE81 /* BorningPointView.swift */,
 				58AC5D0F2C15A83E0060EE81 /* UtilFunctions.swift */,
 				58AC5D192C17DE1F0060EE81 /* allData.json */,
+				58AC5D1A2C184EF50060EE81 /* DestinationPointView.swift */,
 			);
 			path = TowerDefense;
 			sourceTree = "<group>";
@@ -240,6 +243,7 @@
 				58D40ADD2C10A2C000DCF246 /* Enemy.swift in Sources */,
 				581421052C12ADBE00B67BA9 /* TowerView.swift in Sources */,
 				58AC5D102C15A83E0060EE81 /* UtilFunctions.swift in Sources */,
+				58AC5D1B2C184EF50060EE81 /* DestinationPointView.swift in Sources */,
 				58AC5D0C2C14576A0060EE81 /* BorningPointView.swift in Sources */,
 				58D40ACF2C109F9D00DCF246 /* TowerDefenseApp.swift in Sources */,
 				581DF9282C115DD6002A0E59 /* AttackerTower.swift in Sources */,

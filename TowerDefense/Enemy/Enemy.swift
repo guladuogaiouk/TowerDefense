@@ -15,6 +15,8 @@ class Enemy: Identifiable,Equatable,ObservableObject{
         return lhs.id == rhs.id
     }
     var iceTimer: Timer?
+    var fireTimer: Timer?
+    private var fireCount: Int = 0
     let id: UUID
     var name: String
     var speed: Double = 1.0
@@ -22,8 +24,13 @@ class Enemy: Identifiable,Equatable,ObservableObject{
     var originalHp: Int = 100
     var hp: Int = 100{
         didSet{
+            if hp <= 0{
+                if let index = EnemyData.shared.enemies.firstIndex(where: { $0 == self }){
+                    EnemyData.shared.enemies.remove(at: index)
+                    lastTurnPoint.remove(at: index)
+                }
+            }
             if hp <= originalHp / 2 && name == "boss1" && level != 2{
-//                let originalSpeed = self.speed
                 self.speed /= 2
                 Timer.scheduledTimer(withTimeInterval: 1, repeats: false) { _ in
                     self.speed *= 4
@@ -47,17 +54,41 @@ class Enemy: Identifiable,Equatable,ObservableObject{
                 if iceTimer == nil {
                     self.speed /= 2
                 }
-                iceTimer = Timer.scheduledTimer(withTimeInterval: 4, repeats: false) { _ in
+                iceTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: false) { _ in
                     self.speed *= 2
                     self.iceTimer = nil
                     self.isIced = false
                 }
             } else {
-//                self.speed *= 2
-                iceTimer?.invalidate()
-                iceTimer = nil
+                if iceTimer != nil{
+                    iceTimer?.invalidate()
+                    iceTimer = nil
+                    self.speed *= 2
+                }
             }
         }
+    }
+    var isFired: Bool = false {
+        didSet{
+            if isFired {
+                fireCount = 0
+                fireTimer?.invalidate()
+                fireTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
+                    self.hp -= 20
+                    self.fireCount += 1
+                    if self.fireCount >= 3 {
+                        self.isFired = false
+                        self.fireTimer?.invalidate()
+                        self.fireTimer = nil
+                    }
+                }
+            } else {
+                fireCount = 0
+                fireTimer?.invalidate()
+                fireTimer = nil
+            }
+        }
+        
     }
     init(name: String, position: (Double,Double) = (0,0), level: Int) {
         self.id = UUID()

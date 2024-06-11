@@ -24,6 +24,11 @@ struct EnemyView: View {
                 .frame(width: width * 0.7,height: width/2)
                 .offset(y:width/20)
             : nil
+            enemy.isFired ? Image("fireEffect")
+                .resizable()
+                .frame(width: width * 1.2,height: width * 0.7)
+                .offset(y:width/20)
+            : nil
         }
         
     }

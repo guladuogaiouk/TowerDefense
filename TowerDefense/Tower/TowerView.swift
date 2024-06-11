@@ -35,12 +35,9 @@ struct TowerView: View {
         .overlay{
             if(moneyManager.money >= tower.costToNextLevel && tower.level != 3){
                 ZStack{
-//                    Circle()
-//                        .fill(Color.green.opacity(0.1))
-//                        .stroke(Color.green.opacity(0.5),lineWidth: 1)
                     Image(systemName: "arrow.up.circle.fill")
                         .resizable()
-                        .foregroundColor(Color.green.opacity(0.6))
+                        .foregroundColor(Color.green.opacity(0.8))
                         .frame(width: width/2,height: width/2)
                 }
                
