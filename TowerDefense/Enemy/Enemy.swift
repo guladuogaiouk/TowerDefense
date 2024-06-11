@@ -29,6 +29,10 @@ class Enemy: Identifiable,Equatable,ObservableObject{
                     EnemyData.shared.enemies.remove(at: index)
                     lastTurnPoint.remove(at: index)
                 }
+                if let attackerEnemy = self as? AttackerEnemy{
+                    attackerEnemy.attackTimer?.invalidate()
+                    attackerEnemy.attackTimer  = nil
+                }
             }
             if hp <= originalHp / 2 && name == "boss1" && level != 2{
                 self.speed /= 2

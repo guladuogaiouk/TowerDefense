@@ -7,11 +7,12 @@
 
 import Foundation
 class AttackerEnemy: Enemy{
+    var attackTimer: Timer? = nil
     var range: Int{
         return 1
     }
     var attackInterval: TimeInterval{
-        return 0.2
+        return 5
     }
     override init(name: String, position: (Double,Double) = (0,0), level: Int) {
         super.init(name: name, position: position,level: level)

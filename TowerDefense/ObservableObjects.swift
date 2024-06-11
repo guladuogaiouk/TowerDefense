@@ -8,27 +8,22 @@
 import Foundation
 import SwiftUI
 var enemies: [Enemy] = [
-    AttackerEnemy(name: "shield1", level: 3),
-    AttackerEnemy(name: "shield1", level: 1),
-    AttackerEnemy(name: "shield1", level: 1),
-    AttackerEnemy(name: "shield1", level: 2),
-    AttackerEnemy(name: "shield1", level: 2),
-    AttackerEnemy(name: "shield1", level: 3),
+    Enemy(name: "shield1", level: 3),
+    Enemy(name: "shield1", level: 1),
+    Enemy(name: "shield1", level: 1),
+    Enemy(name: "shield1", level: 2),
+    Enemy(name: "shield1", level: 2),
+    Enemy(name: "shield1", level: 3),
     BossAttackEnemy(name: "boss1", level: 1),
     BossAttackEnemy(name: "boss1", level: 1),
-    BossAttackEnemy(name: "boss1", level: 1),
-    BossAttackEnemy(name: "boss1", level: 1),
-    BossAttackEnemy(name: "boss1", level: 1),
-    BossAttackEnemy(name: "boss1", level: 1),
-    BossAttackEnemy(name: "boss1", level: 1),
-    BossAttackEnemy(name: "boss1", level: 1),
-    BossAttackEnemy(name: "boss1", level: 1),
-    BossAttackEnemy(name: "boss1", level: 1),
+    BossAttackEnemy(name: "boss1", level: 1)
 ]
 class CoveredCells: ObservableObject{
+    static let shared = CoveredCells()
     @Published var coveredCells: [(Int,Int)] = []
 }
 class TowerData: ObservableObject{
+    static let shared = TowerData()
     @Published var towers: [Tower] = []
 }
 class EnemyData: ObservableObject {
@@ -38,6 +33,7 @@ class EnemyData: ObservableObject {
 class BulletData: ObservableObject{
     @Published var bullets: [Bullet] = []
     @Published var rangeBullets: [RangeBullet] = []
+    @Published var enemyFreeBullets: [FreeBullet] = []
 }
 class MoneyManager: ObservableObject {
     static let shared = MoneyManager()

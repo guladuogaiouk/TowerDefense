@@ -9,8 +9,18 @@ class Tower: Identifiable, Equatable {
     let id: UUID
     var name: String
     var radius: Double = cellWidth * 0.45
-    var hp: Int {
-        return 100
+    var originalHp: Int = 100
+    var hp: Int = 100 {
+        didSet{
+            if hp <= 0 {
+                attackerTimers[TowerData.shared.towers.firstIndex(of: self)!]?.invalidate()
+                attackerTimers.remove(at: TowerData.shared.towers.firstIndex(of: self)!)
+                TowerData.shared.towers.remove(at:TowerData.shared.towers.firstIndex(of: self)!)
+                if let index = CoveredCells.shared.coveredCells.firstIndex(where: { $0 == self.position }) {
+                    CoveredCells.shared.coveredCells.remove(at: index)
+                }
+            }
+        }
     }
     var price: Int = 100
     var cd: Int = 10

@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct SideButtonView: View {
-    @EnvironmentObject var towerData: TowerData
-    @EnvironmentObject var coveredCells: CoveredCells
+    @ObservedObject var towerData = TowerData.shared
+    @ObservedObject var coveredCells = CoveredCells.shared
     @ObservedObject var moneyManager = MoneyManager.shared
     var tower: Tower
     var body: some View {

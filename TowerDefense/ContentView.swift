@@ -26,9 +26,9 @@ class TowerCardViews: ObservableObject{
 
 struct ContentView: View {
     @ObservedObject var enemyData = EnemyData.shared
-    @EnvironmentObject var towerData: TowerData
+    @ObservedObject var towerData = TowerData.shared
     @EnvironmentObject var towerCardViews: TowerCardViews
-    @EnvironmentObject var coveredCells: CoveredCells
+    @ObservedObject var coveredCells = CoveredCells.shared
     @ObservedObject var moneyManager = MoneyManager.shared
     @EnvironmentObject var bulletData: BulletData
     @State var isCardClicked: Bool = false
@@ -61,6 +61,11 @@ struct ContentView: View {
                             .onTapGesture{
                                 trigger[index] = true
                             }
+                    }
+                    ForEach(bulletData.enemyFreeBullets.indices, id:\.self){ index in
+                        let freeBullet = bulletData.enemyFreeBullets[index]
+                        FreeBulletView(freeBullet: freeBullet)
+                            .position(x:freeBullet.initPosition.0,y:freeBullet.initPosition.1)
                     }
                     ForEach(bulletData.bullets.indices, id:\.self){ index in
                         let bullet = bulletData.bullets[index]
@@ -98,11 +103,29 @@ struct ContentView: View {
                 }
             )
             .onReceive(timer) { _ in
-//                print("1")
                 moveEnemies()
                 rotateTowers()
                 moveBullets()
                 rangeAttack()
+                enemyAttack()
+            }
+        }
+    }
+    func enemyAttack(){
+        for i in enemyData.enemies.indices {
+            let enemy = enemyData.enemies[i]
+            if let bossEnemy = enemy as? BossAttackEnemy{
+                if enemy.name == "boss1"{
+                    if bossEnemy.attackTimer == nil {
+                        bossEnemy.attackTimer = Timer.scheduledTimer(withTimeInterval: bossEnemy.attackInterval, repeats: true){ _ in
+                            for angle: Int in stride(from: 0, through: 359, by: 20) {
+                                let radians = Double(angle) * .pi / 180
+                                let initPosition = enemy.position
+                                bulletData.enemyFreeBullets.append(FreeBullet(angle: radians, initPosition: initPosition, name: enemy.name, level: enemy.level))
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -110,17 +133,10 @@ struct ContentView: View {
         for i in bulletData.rangeBullets.indices{
             let rangeBullet = bulletData.rangeBullets[i]
             if(!attackedRangeBullet.contains(where: { $0 == rangeBullet.id})){
-//                print("1")
                 attackedRangeBullet.append(rangeBullet.id)
                 for enemy in enemyData.enemies{
                     if (getDistance(position1: rangeBullet.initPosition, position2: enemy.position) - enemy.radius <= getRealLength(length: rangeBullet.range)){
                         enemy.hp -= rangeBullet.attackValue
-//                        if enemy.hp <= 0 {
-//                            if let index = enemyData.enemies.firstIndex(of: enemy){
-//                                enemyData.enemies.remove(at: index)
-//                                lastTurnPoint.remove(at: index)
-//                            }
-//                        }
                     }
                 }
             }
@@ -129,6 +145,24 @@ struct ContentView: View {
     func moveBullets(){
         for i in bulletData.bullets.indices.reversed(){
             moveBullet(bulletIndex: i)
+        }
+        for i in bulletData.enemyFreeBullets.indices.reversed(){
+            moveFreeBullet(freeBulletIndex: i)
+        }
+    }
+    func moveFreeBullet(freeBulletIndex: Int){
+        let freeBullet = bulletData.enemyFreeBullets[freeBulletIndex]
+        let nextPosition_x = freeBullet.initPosition.0 + freeBullet.speed * 0.016 * cos(freeBullet.angle)
+        let nextPosition_y = freeBullet.initPosition.1 + freeBullet.speed * 0.016 * sin(freeBullet.angle)
+        freeBullet.initPosition = (nextPosition_x,nextPosition_y)
+        if(freeBullet.initPosition.0 > ScreenSize.width || freeBullet.initPosition.0 < 0 || freeBullet.initPosition.1 > ScreenSize.height || freeBullet.initPosition.1 < 0){
+            bulletData.enemyFreeBullets.remove(at: freeBulletIndex)
+        }
+        for tower in towerData.towers {
+            if(getRealDistance(towerPositionInt: tower.position, enemyPosition: freeBullet.initPosition) < tower.radius){
+                tower.hp -= freeBullet.attackValue
+                bulletData.enemyFreeBullets.remove(at: freeBulletIndex)
+            }
         }
     }
     func moveBullet(bulletIndex: Int){
@@ -145,12 +179,6 @@ struct ContentView: View {
                     enemy.isIced = false
                     enemy.isFired = true
                 }
-//                if(enemy.hp <= 0){
-//                    if let index = enemyData.enemies.firstIndex(of: enemy){
-//                        enemyData.enemies.remove(at: index)
-//                        lastTurnPoint.remove(at: index)
-//                    }
-//                }
             }
                 let delta_X = bullet.flySpeed * 0.016 * cos(bullet.angle)
                 let delta_Y = bullet.flySpeed * 0.016 * sin(bullet.angle)
@@ -199,7 +227,6 @@ struct ContentView: View {
                     if !isEnemyInRange{
                         let realPosition = getRealPosition(position: rangeAttackerTower.position)
                         if let rangeBulletIndex = bulletData.rangeBullets.firstIndex(where: { $0.initPosition == realPosition}){
-                            print("here")
                             bulletData.rangeBullets.remove(at: rangeBulletIndex)
                         }
                         attackerTimers[i]?.invalidate()
@@ -274,10 +301,6 @@ struct ContentView: View {
     }
 
     
-    func getRotateAngle(towerPostionInt:(Int,Int),enemyPosition:(Double,Double)) -> Double{
-        let towerPosition: (Double,Double) = getRealPosition(position: towerPostionInt)
-        return getAngle(position1: towerPosition, position2: enemyPosition)
-    }
     func moveEnemies(){
         for i in enemyData.enemies.indices.reversed() {
             let enemy = enemyData.enemies[i]
@@ -293,44 +316,16 @@ struct ContentView: View {
                 case 0:
                     lastTurnPoint[i] += 1
                 default:
+                if let attackEnemy = enemy as? AttackerEnemy{
+                    attackEnemy.attackTimer?.invalidate()
+                    attackEnemy.attackTimer = nil
+                }
                     enemyData.enemies.remove(at: i)
                     lastTurnPoint.remove(at: i)
             }
         }
     }
-    func isEnemyInPath(enemyPostion:(Double,Double),lastTurnPointIndex: Int)->Int{
-        if(lastTurnPointIndex == turnPoint.count - 1){ return -1 }
-        let lastTurnPointPosition = turnPoint[lastTurnPointIndex]
-        let nextTurnPointPosition = turnPoint[lastTurnPointIndex + 1]
-        let enemyX = enemyPostion.0
-        let enemyY = enemyPostion.1
-        if(lastTurnPointPosition.0 == nextTurnPointPosition.0 && lastTurnPointPosition.1 > nextTurnPointPosition.1){ //从下向上
-            if(enemyX >= lastTurnPointPosition.0 - cellWidth * 0.5 && enemyX <= lastTurnPointPosition.0 + cellWidth * 0.5){
-                if(enemyY <= lastTurnPointPosition.1 && enemyY >= nextTurnPointPosition.1){
-                    return 1
-                }
-            }
-        }else if(lastTurnPointPosition.0 == nextTurnPointPosition.0 && lastTurnPointPosition.1 < nextTurnPointPosition.1){ //从上向下
-            if(enemyX >= lastTurnPointPosition.0 - cellWidth * 0.5 && enemyX <= lastTurnPointPosition.0 + cellWidth * 0.5){
-                if(enemyY >= lastTurnPointPosition.1 && enemyY <= nextTurnPointPosition.1){
-                    return 2
-                }
-            }
-        }else if(lastTurnPointPosition.1 == nextTurnPointPosition.1 && lastTurnPointPosition.0 < nextTurnPointPosition.0){ //从左到右
-            if(enemyY >= lastTurnPointPosition.1 - cellWidth * 0.5 && enemyY <= lastTurnPointPosition.1 + cellWidth * 0.5){
-                if(enemyX >= lastTurnPointPosition.0 && enemyX <= nextTurnPointPosition.0){
-                    return 3
-                }
-            }
-        }else if(lastTurnPointPosition.1 == nextTurnPointPosition.1 && lastTurnPointPosition.0 > nextTurnPointPosition.0){ //从右到左
-            if(enemyY >= lastTurnPointPosition.1 - cellWidth * 0.5 && enemyY <= lastTurnPointPosition.1 + cellWidth * 0.5){
-                if(enemyX <= lastTurnPointPosition.0 && enemyX >= nextTurnPointPosition.0){
-                    return 4
-                }
-            }
-        }
-        return 0
-    }
+    
     func initVariables() {
         turnPoint = getTurnPoint(path: path)
         var index = 0
@@ -354,17 +349,6 @@ struct ContentView: View {
             viewModel.startWaiting()
             towerCardViews.towerCardViews.append(towerCardView)
         }
-    }
-    func getTurnPoint(path:[(Int,Int)]) -> [(Double,Double)]{
-        var turnPoint:[(Double,Double)] = []
-        for i in path.indices{
-            if (i == 0 || i == path.count - 1){
-                turnPoint.append(getRealPosition(position: path[i]))
-            }else if((path[i-1].0 != path[i+1].0) && (path[i-1].1 != path[i+1].1)){
-                turnPoint.append(getRealPosition(position: path[i]))
-            }
-        }
-        return turnPoint
     }
 
     struct HeaderView: View {
@@ -471,9 +455,9 @@ struct ContentView: View {
         @Binding var selectedTower: Tower?
         @Binding var trigger: [Bool]
         @Binding var towerRotateAngles: [Double]
-        @EnvironmentObject var towerData: TowerData
+        @ObservedObject var towerData = TowerData.shared
         @EnvironmentObject var towerCardViews: TowerCardViews
-        @EnvironmentObject var coveredCells: CoveredCells
+        @ObservedObject var coveredCells = CoveredCells.shared
         @EnvironmentObject var moneyManager: MoneyManager
         var position: (Int,Int)
         var isPathCell: Bool

@@ -8,13 +8,10 @@
 import SwiftUI
 
 struct TowerView: View {
-    @State var showHpbar: Bool = false
+    @State var showHpbar: Bool = true
     @Binding var angle: Double
     @ObservedObject var moneyManager = MoneyManager.shared
     var tower: Tower
-    var originalHP: Int {
-        return tower.hp
-    }
     
     private var width: Double {
         return tower.radius * 2
@@ -27,7 +24,7 @@ struct TowerView: View {
                 .aspectRatio(contentMode: .fit)
                 .rotationEffect(Angle(degrees: angle))
             if showHpbar {
-                HPbarView(total: originalHP, now: tower.hp, width: width)
+                HPbarView(total: tower.originalHp, now: tower.hp, width: width)
                     .frame(width: width)
             }
         }
