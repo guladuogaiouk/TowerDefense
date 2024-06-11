@@ -15,7 +15,7 @@ class Bullet: Identifiable{
     }
     var img: String = "normal"
     var flySpeed: Double{
-        return cellWidth * 3
+        return cellWidth * 5
     }
     var angle: Double = 0
     var targetId: UUID

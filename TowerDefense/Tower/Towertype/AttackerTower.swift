@@ -16,7 +16,7 @@ class AttackerTower: Tower {
     
     private func updateAttributes() {
         switch(name) {
-            case "attacker1","attacker2":
+            case "attacker1","attacker2","attacker3":
                 switch(level) {
                     case 1:
                     self.range = 1.5
@@ -26,7 +26,7 @@ class AttackerTower: Tower {
                         self.attackSpeed = 0.2
                     case 3:
                     self.range = 2.5
-                        self.attackSpeed = 0.1
+                        self.attackSpeed = 0.15
                     default:
                         break
                 }

@@ -1,0 +1,110 @@
+[
+    {
+        "level_id": 1,
+        "level_name": "第一关",
+        "original_money": 1000,
+        "path": [
+            [1, 8], [2, 8], [3, 8], [4, 8], [5, 8], [6, 8], [7, 8],
+            [7, 7], [7, 6], [7, 5], [7, 4], [8, 4], [9, 4],
+            [9, 3], [9, 2], [10, 2], [11, 2], [12, 2], [13, 2], [14, 2], [15, 2]
+        ],
+        "towers": [
+            {
+                "type": "AttackerTower",
+                "name": "attacker1"
+            },
+            {
+                "type": "AttackerTower",
+                "name": "attacker2"
+            },
+            {
+                "type": "AttackerTower",
+                "name": "attacker3"
+            },
+            {
+                "type": "RangeAttackerTower",
+                "name": "attacker4"
+            },
+            {
+                "type": "ProducerTower",
+                "name": "producer1"
+            }
+        ],
+        "enemies": [
+            {
+                "wave": 1,
+                "enemies": [
+                    {
+                        "type": "AttackerEnemy",
+                        "name": "shield1"
+                    },
+                    {
+                        "type": "AttackerEnemy",
+                        "name": "shield1"
+                    },
+                    {
+                        "type": "AttackerEnemy",
+                        "name": "shield1"
+                    },
+                    {
+                        "type": "AttackerEnemy",
+                        "name": "shield1"
+                    },
+                    {
+                        "type": "AttackerEnemy",
+                        "name": "shield1"
+                    },
+                    {
+                        "type": "AttackerEnemy",
+                        "name": "shield1"
+                    },
+                    {
+                        "type": "BossAttackerEnemy",
+                        "name": "boss1"
+                    },
+                    {
+                        "type": "BossAttackerEnemy",
+                        "name": "boss1"
+                    }
+                ]
+            },
+            {
+                "wave": 2,
+                "enemies": [
+                    {
+                        "type": "AttackerEnemy",
+                        "name": "shield1"
+                    },
+                    {
+                        "type": "AttackerEnemy",
+                        "name": "shield1"
+                    },
+                    {
+                        "type": "AttackerEnemy",
+                        "name": "shield1"
+                    },
+                    {
+                        "type": "AttackerEnemy",
+                        "name": "shield1"
+                    },
+                    {
+                        "type": "AttackerEnemy",
+                        "name": "shield1"
+                    },
+                    {
+                        "type": "AttackerEnemy",
+                        "name": "shield1"
+                    },
+                    {
+                        "type": "BossAttackerEnemy",
+                        "name": "boss1"
+                    },
+                    {
+                        "type": "BossAttackerEnemy",
+                        "name": "boss1"
+                    }
+                ]
+            }
+        ]
+    }
+]

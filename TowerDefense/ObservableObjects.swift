@@ -8,14 +8,22 @@
 import Foundation
 import SwiftUI
 var enemies: [Enemy] = [
-    AttackerEnemy(name: "shield1", level: 1),
+    AttackerEnemy(name: "shield1", level: 3),
     AttackerEnemy(name: "shield1", level: 1),
     AttackerEnemy(name: "shield1", level: 1),
     AttackerEnemy(name: "shield1", level: 2),
     AttackerEnemy(name: "shield1", level: 2),
     AttackerEnemy(name: "shield1", level: 3),
     BossAttackEnemy(name: "boss1", level: 1),
-    BossAttackEnemy(name: "boss1", level: 1)
+    BossAttackEnemy(name: "boss1", level: 1),
+    BossAttackEnemy(name: "boss1", level: 1),
+    BossAttackEnemy(name: "boss1", level: 1),
+    BossAttackEnemy(name: "boss1", level: 1),
+    BossAttackEnemy(name: "boss1", level: 1),
+    BossAttackEnemy(name: "boss1", level: 1),
+    BossAttackEnemy(name: "boss1", level: 1),
+    BossAttackEnemy(name: "boss1", level: 1),
+    BossAttackEnemy(name: "boss1", level: 1),
 ]
 class CoveredCells: ObservableObject{
     @Published var coveredCells: [(Int,Int)] = []
@@ -32,7 +40,8 @@ class BulletData: ObservableObject{
 }
 class MoneyManager: ObservableObject {
     static let shared = MoneyManager()
-    @Published var money = 2000
+    @Published var money: Int = 1000
+    private init() {}
 }
 
 class ScreenSize: ObservableObject {

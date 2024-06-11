@@ -9,15 +9,23 @@ struct EnemyView: View {
         return enemy.radius * 2
     }
     var body: some View {
-        VStack {
-            HPbarView(total: originalHP, now: enemy.hp, width: width)
-                .frame(width: width)
-            Image(enemy.img)
+        ZStack(alignment: .bottom){
+            VStack {
+                HPbarView(total: originalHP, now: enemy.hp, width: width)
+                    .frame(width: width)
+                Image(enemy.img)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: width)
+            }
+            .frame(maxWidth: .infinity, alignment: .center)
+            enemy.isIced ? Image("iceEffect")
                 .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: width)
+                .frame(width: width * 0.7,height: width/2)
+                .offset(y:width/20)
+            : nil
         }
-        .frame(maxWidth: .infinity, alignment: .center)
+        
     }
 }
 
@@ -42,11 +50,11 @@ struct HPProgressViewStyle: ProgressViewStyle {
             ZStack(alignment: .leading) {
                 RoundedRectangle(cornerRadius: 2)
                     .frame(height: 4)
-                    .foregroundColor(.gray.opacity(0.3))
+                    .foregroundColor(.gray.opacity(0.4))
                 RoundedRectangle(cornerRadius: 2.5)
                     .overlay(RoundedRectangle(cornerRadius: 2).stroke(Color.black, lineWidth: 2))
                     .frame(width: CGFloat(configuration.fractionCompleted ?? 0) * width, height: 4)
-                    .foregroundColor(.red)
+                    .foregroundColor(.pink)
             }
         }
         .frame(width: width)

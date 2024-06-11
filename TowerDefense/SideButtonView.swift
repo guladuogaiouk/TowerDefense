@@ -10,7 +10,7 @@ import SwiftUI
 struct SideButtonView: View {
     @EnvironmentObject var towerData: TowerData
     @EnvironmentObject var coveredCells: CoveredCells
-    @EnvironmentObject var moneyManager: MoneyManager
+    @ObservedObject var moneyManager = MoneyManager.shared
     var tower: Tower
     var body: some View {
         ZStack{
@@ -34,7 +34,7 @@ struct SideButtonView: View {
                                     .font(.footnote)
                             }
                         }
-                    } else if moneyManager.money > tower.price {
+                    } else if moneyManager.money >= tower.costToNextLevel {
                         ZStack {
                             RoundedRectangle(cornerRadius: 2).fill(Color.green.opacity(0.6))
                                 .frame(width: cellWidth * 0.4, height: cellHeight * 0.65)

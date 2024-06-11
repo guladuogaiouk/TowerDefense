@@ -134,6 +134,11 @@ struct ContentView: View {
             if(getDistance(position1: bullet.initPosition, position2: enemy.position) <= enemy.radius){
                 bulletData.bullets.remove(at: bulletIndex)
                 enemy.hp -= bullet.attackValue
+                if bullet.name == "attacker3"{
+//                    print("iced")
+//                    enemy
+                    enemy.isIced = true
+                }
                 if(enemy.hp <= 0){
                     if let index = enemyData.enemies.firstIndex(of: enemy){
                         enemyData.enemies.remove(at: index)
@@ -359,8 +364,8 @@ struct ContentView: View {
     struct HeaderView: View {
         @Binding var isCardClicked: Bool
         @Binding var selectedTower: Tower?
-        @EnvironmentObject var moneyManager: MoneyManager
         @EnvironmentObject var towerCardViews: TowerCardViews
+        @ObservedObject var moneyManager = MoneyManager.shared
         func clickTowerCard(tower: Tower){
             if selectedTower != nil{
                 if selectedTower == tower{
