@@ -2,18 +2,7 @@ import SwiftUI
 
 var cellWidth: Double = ScreenSize.cellScale
 var cellHeight: Double = ScreenSize.cellScale
-let path: [(Int, Int)] = [
-    (1, 8), (2, 8), (3, 8), (4, 8), (5, 8), (6, 8), (7, 8),
-    (7, 7), (7, 6), (7, 5), (7, 4), (8, 4), (9, 4),
-    (9, 3), (9, 2), (10, 2), (11, 2), (12, 2), (13, 2), (14, 2), (15, 2)
-]
-var towerCards: [Tower] = [
-    AttackerTower(name: "attacker1", level: 1, position: (0,0)),
-    AttackerTower(name: "attacker2", level: 1, position: (0,0)),
-    AttackerTower(name: "attacker3", level: 1, position: (0,0)),
-    RangeAttackerTower(name: "attacker4", level: 1, position: (0,0)),
-    ProducerTower(name: "producer1", level: 1, position: (0,0),isCard: true)
-]
+
 var turnPoint: [(Double,Double)] = []
 var lastTurnPoint: [Int] = []
 var attackerTimers: [Timer?] = []
@@ -23,8 +12,12 @@ class TowerCardViews: ObservableObject{
     @Published var towerCardViews: [TowerCardView] = []
 }
 
+var mainTimer: Timer? = nil
 
 struct ContentView: View {
+    @StateObject private var viewModel = JsonModel()
+    var level: Int
+    @Binding var showView: Int
     @ObservedObject var enemyData = EnemyData.shared
     @ObservedObject var towerData = TowerData.shared
     @EnvironmentObject var towerCardViews: TowerCardViews
@@ -80,12 +73,14 @@ struct ContentView: View {
                             .position(x: realPosition.0,y:realPosition.1)
                         : nil
                     }
-                    BorningPointView()
-                        .position(x:getRealPosition(position: path[0]).0, y: getRealPosition(position: path[0]).1)
-                        .offset(y: -cellWidth / 2)
-                    DestinationPointView()
-                        .position(x:getRealPosition(position: path[path.count - 1]).0, y: getRealPosition(position: path[path.count - 1]).1)
-                        .offset(y: -cellWidth / 2)
+                    if !path.isEmpty {
+                        BorningPointView()
+                            .position(x: getRealPosition(position: path[0]).0, y: getRealPosition(position: path[0]).1)
+                            .offset(y: -cellWidth / 2)
+                        DestinationPointView()
+                            .position(x: getRealPosition(position: path[path.count - 1]).0, y: getRealPosition(position: path[path.count - 1]).1)
+                            .offset(y: -cellWidth / 2)
+                    }
                 }
                 .frame(height: cellHeight * 9.0)
             }
@@ -109,6 +104,31 @@ struct ContentView: View {
                 rangeAttack()
                 enemyAttack()
             }
+            .onDisappear(){
+                path.removeAll()
+                mainTimer?.invalidate()
+                towerCards.removeAll()
+                towerCardViews.towerCardViews.removeAll()
+                enemyWaves.removeAll()
+                moneyManager.money = 0
+                turnPoint.removeAll()
+                bulletData.rangeBullets.removeAll()
+                bulletData.bullets.removeAll()
+                bulletData.enemyFreeBullets.removeAll()
+                for enemy in enemyData.enemies{
+                    if let attackerEnemy = enemy as? AttackerEnemy{
+                        attackerEnemy.attackTimer?.invalidate()
+                    }
+                }
+                enemyData.enemies.removeAll()
+                towerData.towers.removeAll()
+                lastTurnPoint.removeAll()
+                for timer in attackerTimers{
+                    timer?.invalidate()
+                }
+                attackerTimers.removeAll()
+                attackedRangeBullet.removeAll()
+            }
         }
     }
     func enemyAttack(){
@@ -117,7 +137,11 @@ struct ContentView: View {
             if let bossEnemy = enemy as? BossAttackEnemy{
                 if enemy.name == "boss1"{
                     if bossEnemy.attackTimer == nil {
-                        bossEnemy.attackTimer = Timer.scheduledTimer(withTimeInterval: bossEnemy.attackInterval, repeats: true){ _ in
+                        bossEnemy.attackTimer = Timer.scheduledTimer(withTimeInterval: bossEnemy.attackInterval, repeats: true){ timer in
+                            guard showView == 2 else {
+                                timer.invalidate()
+                                return
+                            }
                             for angle: Int in stride(from: 0, through: 359, by: 20) {
                                 let radians = Double(angle) * .pi / 180
                                 let initPosition = enemy.position
@@ -203,7 +227,11 @@ struct ContentView: View {
                             if attackerTimers[i] == nil{
                                 let realPosition = getRealPosition(position: rangeAttackerTower.position)
                                 bulletData.rangeBullets.append(RangeBullet(initPosition: realPosition , name: rangeAttackerTower.name, level: rangeAttackerTower.level,range: rangeAttackerTower.range,attackSpeed: rangeAttackerTower.attackSpeed))
-                                _ = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false){ _ in
+                                _ = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false){ timer in
+                                    guard showView == 2 else {
+                                        timer.invalidate()
+                                        return
+                                    }
                                     if let rangeBulletIndex = bulletData.rangeBullets.firstIndex(where: { $0.initPosition == realPosition}){
                                         bulletData.rangeBullets.remove(at: rangeBulletIndex)
                                     }
@@ -211,7 +239,11 @@ struct ContentView: View {
                                 attackerTimers[i] = Timer.scheduledTimer(withTimeInterval: rangeAttackerTower.attackSpeed, repeats: true){ _ in
                                     let realPosition = getRealPosition(position: rangeAttackerTower.position)
                                     bulletData.rangeBullets.append(RangeBullet(initPosition: realPosition , name: rangeAttackerTower.name, level: rangeAttackerTower.level,range: rangeAttackerTower.range,attackSpeed: rangeAttackerTower.attackSpeed))
-                                    _ = Timer.scheduledTimer(withTimeInterval: rangeAttackerTower.attackSpeed / 3, repeats: false){ _ in
+                                    _ = Timer.scheduledTimer(withTimeInterval: rangeAttackerTower.attackSpeed / 3, repeats: false){ timer in
+                                        guard showView == 2 else {
+                                            timer.invalidate()
+                                            return
+                                        }
                                         if let rangeBulletIndex = bulletData.rangeBullets.firstIndex(where: { $0.initPosition == realPosition}){
                                             if let bulletIdIndex = attackedRangeBullet.firstIndex(where: { $0 == bulletData.rangeBullets[rangeBulletIndex].id}){
                                                 attackedRangeBullet.remove(at: bulletIdIndex)
@@ -241,7 +273,11 @@ struct ContentView: View {
                             towerRotateAngles[i] = getRotateAngle(towerPostionInt: attackerTower.position, enemyPosition: enemy.position)
                             if attackerTimers[i] == nil {
                                 attackerTower.currentEnemy = enemy.id
-                                attackerTimers[i] = Timer.scheduledTimer(withTimeInterval: attackerTower.attackSpeed, repeats: true) { _ in
+                                attackerTimers[i] = Timer.scheduledTimer(withTimeInterval: attackerTower.attackSpeed, repeats: true) { timer in
+                                    guard showView == 2 else {
+                                        timer.invalidate()
+                                        return
+                                    }
                                     let realPosition = getRealPosition(position: attackerTower.position)
                                     let adjustedAngle = towerRotateAngles[i] / 180 * .pi
                                     let bulletInitPosition: (Double, Double) = (realPosition.0 - attackerTower.radius * cos(adjustedAngle), realPosition.1 - attackerTower.radius * sin(adjustedAngle))
@@ -251,7 +287,11 @@ struct ContentView: View {
                                 attackerTimers[i]?.invalidate()
                                 attackerTimers[i] = nil
                                 attackerTower.currentEnemy = enemy.id
-                                attackerTimers[i] = Timer.scheduledTimer(withTimeInterval: attackerTower.attackSpeed, repeats: true) { _ in
+                                attackerTimers[i] = Timer.scheduledTimer(withTimeInterval: attackerTower.attackSpeed, repeats: true) { timer in
+                                    guard showView == 2 else {
+                                        timer.invalidate()
+                                        return
+                                    }
                                     let realPosition = getRealPosition(position: attackerTower.position)
                                     let adjustedAngle = towerRotateAngles[i] / 180 * .pi
                                     let bulletInitPosition: (Double, Double) = (realPosition.0 - attackerTower.radius * cos(adjustedAngle), realPosition.1 - attackerTower.radius * sin(adjustedAngle))
@@ -300,7 +340,6 @@ struct ContentView: View {
         return enemyOrder
     }
 
-    
     func moveEnemies(){
         for i in enemyData.enemies.indices.reversed() {
             let enemy = enemyData.enemies[i]
@@ -316,27 +355,47 @@ struct ContentView: View {
                 case 0:
                     lastTurnPoint[i] += 1
                 default:
-                if let attackEnemy = enemy as? AttackerEnemy{
-                    attackEnemy.attackTimer?.invalidate()
-                    attackEnemy.attackTimer = nil
-                }
+                    if let attackEnemy = enemy as? AttackerEnemy{
+                        attackEnemy.attackTimer?.invalidate()
+                        attackEnemy.attackTimer = nil
+                    }
                     enemyData.enemies.remove(at: i)
                     lastTurnPoint.remove(at: i)
+                    showView = 3
             }
         }
     }
     
     func initVariables() {
+        path = viewModel.levelItems[level].path
+        towerCards = produceTowerCards(jsonTowers: viewModel.levelItems[level].towers) 
+        enemyWaves = produceEnemies(jsonEnemies: viewModel.levelItems[level].enemies)
+        moneyManager.money = viewModel.levelItems[level].original_money
         turnPoint = getTurnPoint(path: path)
-        var index = 0
-        _ = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
-            if index < enemies.count {
+        var wave = 0
+        mainTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true){ timer in
+            guard wave < enemyWaves.count && showView == 2 else {
+                timer.invalidate()
+                return
+            }
+            if wave == 0{
+                timer.fireDate = Date().addingTimeInterval(37)
+            }
+            var index = 0
+            wave += 1
+            let enemies = enemyWaves[wave-1].enemies
+            _ = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+                guard index < enemies.count && showView == 2 else {
+                    timer.invalidate()
+                    return
+                }
                 enemyData.enemies.append(enemies[index])
                 enemyData.enemies[enemyData.enemies.count - 1].position = turnPoint[0]
                 lastTurnPoint.append(0)
                 index += 1
             }
         }
+        
         for i in towerData.towers.indices {
             towerData.towers[i].position = (towerData.towers[i].position.0, towerData.towers[i].position.1)
         }

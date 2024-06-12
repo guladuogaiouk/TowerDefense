@@ -101,7 +101,7 @@ class Enemy: Identifiable,Equatable,ObservableObject{
         self.level = level
         switch(name){
             case "shield1" :
-            self.speed = 0.8
+            self.speed = 2.0
                 self.radius = cellWidth * 0.35
                 switch(level){
                     case 1: self.originalHp = 100
@@ -117,4 +117,14 @@ class Enemy: Identifiable,Equatable,ObservableObject{
         }
         self.hp = self.originalHp
     }
+    deinit{
+        fireTimer?.invalidate()
+        iceTimer?.invalidate()
+    }
+}
+
+//@Observable
+struct EnemyWave{
+    var wave: Int
+    var enemies: [Enemy] = []
 }

@@ -7,17 +7,21 @@
 
 import Foundation
 import SwiftUI
-var enemies: [Enemy] = [
-    Enemy(name: "shield1", level: 3),
-    Enemy(name: "shield1", level: 1),
-    Enemy(name: "shield1", level: 1),
-    Enemy(name: "shield1", level: 2),
-    Enemy(name: "shield1", level: 2),
-    Enemy(name: "shield1", level: 3),
-    BossAttackEnemy(name: "boss1", level: 1),
-    BossAttackEnemy(name: "boss1", level: 1),
-    BossAttackEnemy(name: "boss1", level: 1)
-]
+//var enemies: [Enemy] = [
+//    Enemy(name: "shield1", level: 3),
+//    Enemy(name: "shield1", level: 1),
+//    Enemy(name: "shield1", level: 1),
+//    Enemy(name: "shield1", level: 2),
+//    Enemy(name: "shield1", level: 2),
+//    Enemy(name: "shield1", level: 3),
+//    BossAttackEnemy(name: "boss1", level: 1),
+//    BossAttackEnemy(name: "boss1", level: 1),
+//    BossAttackEnemy(name: "boss1", level: 1)
+//]
+var enemyWaves: [EnemyWave] = []
+var path: [(Int,Int)] = []
+var towerCards: [Tower] = []
+
 class CoveredCells: ObservableObject{
     static let shared = CoveredCells()
     @Published var coveredCells: [(Int,Int)] = []
@@ -37,10 +41,9 @@ class BulletData: ObservableObject{
 }
 class MoneyManager: ObservableObject {
     static let shared = MoneyManager()
-    @Published var money: Int = 1000
+    @Published var money: Int = 0
     private init() {}
 }
-
 class ScreenSize: ObservableObject {
     static let shared = ScreenSize()
     static var width: Double {

@@ -17,4 +17,7 @@ class AttackerEnemy: Enemy{
     override init(name: String, position: (Double,Double) = (0,0), level: Int) {
         super.init(name: name, position: position,level: level)
     }
+    deinit{
+        attackTimer?.invalidate()
+    }
 }
