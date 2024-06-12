@@ -284,7 +284,10 @@ struct ContentView: View {
                                 attackerTower.currentEnemy = enemy.id
                                 attackerTimers[i] = Timer.scheduledTimer(withTimeInterval: attackerTower.attackSpeed, repeats: true) { timer in
                                     let realPosition = getRealPosition(position: attackerTower.position)
-                                    
+                                    guard i < towerData.towerRotateAngles.count else{
+                                        timer.invalidate()
+                                        return
+                                    }
                                     let adjustedAngle = towerData.towerRotateAngles[i] / 180 * .pi
                                     let bulletInitPosition: (Double, Double) = (realPosition.0 - attackerTower.radius * cos(adjustedAngle), realPosition.1 - attackerTower.radius * sin(adjustedAngle))
                                     bulletData.bullets.append(Bullet(initPosition: bulletInitPosition, targetId: enemy.id, name: attackerTower.name, level: attackerTower.level))

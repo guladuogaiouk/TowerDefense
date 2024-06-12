@@ -16,7 +16,7 @@ class FreeBullet: Identifiable{
     var initPosition: (Double,Double)
     var img: String = "boss1_bullet"
     var radius: Double = cellWidth * 0.15
-    var attackValue: Int = 50
+    var attackValue: Int = 10
     init(angle: Double, initPosition: (Double, Double),name: String,level:Int) {
         self.id = UUID()
         self.angle = angle
