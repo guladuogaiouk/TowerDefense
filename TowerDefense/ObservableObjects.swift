@@ -7,17 +7,7 @@
 
 import Foundation
 import SwiftUI
-//var enemies: [Enemy] = [
-//    Enemy(name: "shield1", level: 3),
-//    Enemy(name: "shield1", level: 1),
-//    Enemy(name: "shield1", level: 1),
-//    Enemy(name: "shield1", level: 2),
-//    Enemy(name: "shield1", level: 2),
-//    Enemy(name: "shield1", level: 3),
-//    BossAttackEnemy(name: "boss1", level: 1),
-//    BossAttackEnemy(name: "boss1", level: 1),
-//    BossAttackEnemy(name: "boss1", level: 1)
-//]
+
 var enemyWaves: [EnemyWave] = []
 var path: [(Int,Int)] = []
 var towerCards: [Tower] = []
@@ -29,6 +19,7 @@ class CoveredCells: ObservableObject{
 class TowerData: ObservableObject{
     static let shared = TowerData()
     @Published var towers: [Tower] = []
+    @Published var towerRotateAngles: [Double] = []
 }
 class EnemyData: ObservableObject {
     static let shared = EnemyData()

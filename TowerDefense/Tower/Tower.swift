@@ -13,9 +13,17 @@ class Tower: Identifiable, Equatable {
     var hp: Int = 100 {
         didSet{
             if hp <= 0 {
-                attackerTimers[TowerData.shared.towers.firstIndex(of: self)!]?.invalidate()
-                attackerTimers.remove(at: TowerData.shared.towers.firstIndex(of: self)!)
-                TowerData.shared.towers.remove(at:TowerData.shared.towers.firstIndex(of: self)!)
+                if let index = TowerData.shared.towers.firstIndex(of: self){
+//                    print(index,TowerData.shared.towers,TowerData.shared.towerRotateAngles)
+                    attackerTimers[index]?.invalidate()
+                    attackerTimers.remove(at: index)
+                    TowerData.shared.towerRotateAngles.remove(at: index)
+                    TowerData.shared.towers.remove(at: index)
+//                    print(index,TowerData.shared.towers,TowerData.shared.towerRotateAngles)
+                }
+//                attackerTimers[TowerData.shared.towers.firstIndex(of: self)!]?.invalidate()
+//                attackerTimers.remove(at: TowerData.shared.towers.firstIndex(of: self)!)
+//                TowerData.shared.towers.remove(at:TowerData.shared.towers.firstIndex(of: self)!)
                 if let index = CoveredCells.shared.coveredCells.firstIndex(where: { $0 == self.position }) {
                     CoveredCells.shared.coveredCells.remove(at: index)
                 }

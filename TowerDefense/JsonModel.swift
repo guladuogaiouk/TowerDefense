@@ -8,15 +8,18 @@
 import Foundation
 import SwiftUI
 
-struct ItemJson: Decodable {
-//    var id = UUID()
+struct TowerItemJson: Decodable {
     var type: String
     var name: String
 }
-
+struct EnemyItemJson: Decodable {
+    var type: String
+    var name: String
+    var level: Int
+}
 struct EnemyWaveJson: Decodable {
     var wave: Int
-    var enemies: [ItemJson]
+    var enemies: [EnemyItemJson]
 }
 
 struct LevelItem: Identifiable, Decodable {
@@ -24,7 +27,7 @@ struct LevelItem: Identifiable, Decodable {
     var level_id: Int
     var original_money: Int
     var path: [(Int, Int)]
-    var towers: [ItemJson]
+    var towers: [TowerItemJson]
     var enemies: [EnemyWaveJson]
 
     private enum CodingKeys: String, CodingKey {
@@ -35,7 +38,7 @@ struct LevelItem: Identifiable, Decodable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         level_id = try container.decode(Int.self, forKey: .level_id)
         original_money = try container.decode(Int.self, forKey: .original_money)
-        towers = try container.decode([ItemJson].self, forKey: .towers)
+        towers = try container.decode([TowerItemJson].self, forKey: .towers)
         enemies = try container.decode([EnemyWaveJson].self, forKey: .enemies)
 
         let pathArray = try container.decode([[Int]].self, forKey: .path)
@@ -44,6 +47,7 @@ struct LevelItem: Identifiable, Decodable {
 }
 
 class JsonModel: ObservableObject {
+    static var shared = JsonModel()
     @Published var levelItems: [LevelItem] = []
     init() {
         loadJSON()

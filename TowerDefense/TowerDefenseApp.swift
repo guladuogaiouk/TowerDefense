@@ -27,6 +27,10 @@ struct TowerDefenseApp: App {
                         .environmentObject(bulletData)
                 case 3:
                     LoseView(showView: $showView)
+                case 4:
+                    WinView(showView: $showView, level: $level)
+                case 5:
+                    SettingView(showView: $showView, level: $level)
                 default:
                     AnyView(HomeView(level: $level,showView: $showView))
             }

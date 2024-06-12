@@ -13,6 +13,7 @@ class TowerCardViews: ObservableObject{
 }
 
 var mainTimer: Timer? = nil
+var submainTimer: Timer? = nil
 
 struct ContentView: View {
     @StateObject private var viewModel = JsonModel()
@@ -27,16 +28,16 @@ struct ContentView: View {
     @State var isCardClicked: Bool = false
     @State var selectedTower: Tower? = nil
     @State var trigger: [Bool] = []
-    @State var towerRotateAngles: [Double] = []
+    @State var enemyFinished: Bool = false
+    @State var wave: Int = 0
     var timer = Timer.publish(every: 0.016, on: .main, in: .common).autoconnect()
     var body: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                HeaderView(isCardClicked: $isCardClicked,selectedTower: $selectedTower)
+                HeaderView(showView: $showView, isCardClicked: $isCardClicked,selectedTower: $selectedTower,wave:$wave)
                     .frame(height: cellHeight * 1.0)
                 ZStack{
-                    GridView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, trigger: $trigger, towerRotateAngles: $towerRotateAngles, path: path)
-                    
+                    GridView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, trigger: $trigger, path: path)
                     ForEach(enemyData.enemies){enemy in
                         EnemyView(enemy: enemy)
                             .position(x: enemy.position.0, y: enemy.position.1)
@@ -49,7 +50,7 @@ struct ContentView: View {
                     ForEach(towerData.towers.indices, id:\.self){ index in
                         let tower = towerData.towers[index]
                         let realPosition = getRealPosition(position: tower.position)
-                        TowerView(angle: $towerRotateAngles[index], tower: tower)
+                        TowerView(angle: towerData.towerRotateAngles[index], tower: tower)
                             .position(x: realPosition.0,y:realPosition.1)
                             .onTapGesture{
                                 trigger[index] = true
@@ -103,6 +104,12 @@ struct ContentView: View {
                 moveBullets()
                 rangeAttack()
                 enemyAttack()
+                if enemyFinished && submainTimer == nil{
+                    if enemyData.enemies.isEmpty{
+                        showView = 4
+                    }
+                }
+//                print(towerData.towerRotateAngles)
             }
             .onDisappear(){
                 path.removeAll()
@@ -128,6 +135,7 @@ struct ContentView: View {
                 }
                 attackerTimers.removeAll()
                 attackedRangeBullet.removeAll()
+                coveredCells.coveredCells.removeAll()
             }
         }
     }
@@ -215,7 +223,8 @@ struct ContentView: View {
         }
     }
     func rotateTowers() {
-        for i in towerData.towers.indices {
+        for i in towerData.towers.indices{
+//            print(i,towerData.towers.count)
             let tower = towerData.towers[i]
             if let attackerTower = tower as? AttackerTower {
                 if let rangeAttackerTower = attackerTower as? RangeAttackerTower{
@@ -265,21 +274,18 @@ struct ContentView: View {
                         attackerTimers[i] = nil
                     }
                 }else{
-                    let range = getRealLength(length: attackerTower.range) + 2
+                    let range = getRealLength(length: attackerTower.range)
                     var enemyInRange = false
                     for j in getAllEnemiesOrder() {
                         let enemy = enemyData.enemies[j]
                         if getRealDistance(towerPositionInt: attackerTower.position, enemyPosition: enemy.position) - enemy.radius <= range {
-                            towerRotateAngles[i] = getRotateAngle(towerPostionInt: attackerTower.position, enemyPosition: enemy.position)
+                            towerData.towerRotateAngles[i] = getRotateAngle(towerPostionInt: attackerTower.position, enemyPosition: enemy.position)
                             if attackerTimers[i] == nil {
                                 attackerTower.currentEnemy = enemy.id
                                 attackerTimers[i] = Timer.scheduledTimer(withTimeInterval: attackerTower.attackSpeed, repeats: true) { timer in
-                                    guard showView == 2 else {
-                                        timer.invalidate()
-                                        return
-                                    }
                                     let realPosition = getRealPosition(position: attackerTower.position)
-                                    let adjustedAngle = towerRotateAngles[i] / 180 * .pi
+                                    
+                                    let adjustedAngle = towerData.towerRotateAngles[i] / 180 * .pi
                                     let bulletInitPosition: (Double, Double) = (realPosition.0 - attackerTower.radius * cos(adjustedAngle), realPosition.1 - attackerTower.radius * sin(adjustedAngle))
                                     bulletData.bullets.append(Bullet(initPosition: bulletInitPosition, targetId: enemy.id, name: attackerTower.name, level: attackerTower.level))
                                 }
@@ -287,13 +293,15 @@ struct ContentView: View {
                                 attackerTimers[i]?.invalidate()
                                 attackerTimers[i] = nil
                                 attackerTower.currentEnemy = enemy.id
+//                                print(i,towerData.towers.count,attackerTimers.count,towerData.towerRotateAngles.count)
+                                
                                 attackerTimers[i] = Timer.scheduledTimer(withTimeInterval: attackerTower.attackSpeed, repeats: true) { timer in
-                                    guard showView == 2 else {
+                                    guard i < towerData.towerRotateAngles.count else{
                                         timer.invalidate()
                                         return
                                     }
+                                    let adjustedAngle = towerData.towerRotateAngles[i] / 180 * .pi
                                     let realPosition = getRealPosition(position: attackerTower.position)
-                                    let adjustedAngle = towerRotateAngles[i] / 180 * .pi
                                     let bulletInitPosition: (Double, Double) = (realPosition.0 - attackerTower.radius * cos(adjustedAngle), realPosition.1 - attackerTower.radius * sin(adjustedAngle))
                                     bulletData.bullets.append(Bullet(initPosition: bulletInitPosition, targetId: enemy.id, name: attackerTower.name, level: attackerTower.level))
                                 }
@@ -372,27 +380,27 @@ struct ContentView: View {
         enemyWaves = produceEnemies(jsonEnemies: viewModel.levelItems[level].enemies)
         moneyManager.money = viewModel.levelItems[level].original_money
         turnPoint = getTurnPoint(path: path)
-        var wave = 0
-        mainTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: true){ timer in
+        mainTimer = Timer.scheduledTimer(withTimeInterval: 15, repeats: true){ timer in
             guard wave < enemyWaves.count && showView == 2 else {
                 timer.invalidate()
                 return
             }
-            if wave == 0{
-                timer.fireDate = Date().addingTimeInterval(37)
-            }
             var index = 0
             wave += 1
             let enemies = enemyWaves[wave-1].enemies
-            _ = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+            submainTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
                 guard index < enemies.count && showView == 2 else {
                     timer.invalidate()
+                    submainTimer = nil
                     return
                 }
                 enemyData.enemies.append(enemies[index])
                 enemyData.enemies[enemyData.enemies.count - 1].position = turnPoint[0]
                 lastTurnPoint.append(0)
                 index += 1
+            }
+            if wave == enemyWaves.count{
+                enemyFinished = true
             }
         }
         
@@ -411,8 +419,10 @@ struct ContentView: View {
     }
 
     struct HeaderView: View {
+        @Binding var showView: Int
         @Binding var isCardClicked: Bool
         @Binding var selectedTower: Tower?
+        @Binding var wave: Int
         @EnvironmentObject var towerCardViews: TowerCardViews
         @ObservedObject var moneyManager = MoneyManager.shared
         func clickTowerCard(tower: Tower){
@@ -429,16 +439,22 @@ struct ContentView: View {
             }
         }
         var body: some View {
-            HStack {
-                HStack {
-                    Image(systemName: "cross.fill")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
-                    Text("\(moneyManager.money)")
-                        .font(.title)
-                        .fontWeight(.bold)
+            HStack() {
+                VStack(spacing:10){
+                    HStack {
+                        Image(systemName: "cross.fill")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 30, height: 30)
+                        Text("\(moneyManager.money)")
+                            .font(.title)
+                            .fontWeight(.bold)
+                    }
+                    Text("WAVE \(wave) / \(enemyWaves.count)")
+                        .foregroundColor(.gray)
+                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                 }
+                
                 .foregroundColor(Color(red: 112/255, green: 173/255, blue: 71/255))
                 .frame(width: 140, height: 90, alignment: .center)
                 .padding(10)
@@ -478,10 +494,23 @@ struct ContentView: View {
                                 .fill(Color(red: 242/255, green: 242/255, blue: 242/255))
                                 .frame(width: cellWidth * 0.8, height: cellHeight * 1.0)
                         }
-                        
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(alignment: .leading)
+                HStack{
+                    Image(systemName: "gearshape.fill")
+                        .resizable()
+                        .frame(width: cellWidth * 0.4,height: cellWidth * 0.4)
+                    Text("REPLAY")
+                        .font(.title2)
+                        .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
+                }
+                .foregroundColor(Color.gray)
+                .frame(height: cellWidth)
+                .onTapGesture {
+                    showView = 5
+                }
+                .frame(maxWidth: .infinity,alignment: .center)
             }
             .padding(.bottom, 30)
             .frame(maxHeight: .infinity)
@@ -493,7 +522,6 @@ struct ContentView: View {
         @Binding var isCardClicked: Bool
         @Binding var selectedTower: Tower?
         @Binding var trigger: [Bool]
-        @Binding var towerRotateAngles: [Double]
         var path: [(Int, Int)]
         var body: some View {
             VStack(spacing: 0) {
@@ -501,7 +529,7 @@ struct ContentView: View {
                     HStack(spacing: 0) {
                         ForEach(0..<15, id: \.self) { column in
                             let isPathCell = path.contains(where: { $0 == (column + 1, 9 - row) })
-                            CellView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, trigger: $trigger, towerRotateAngles: $towerRotateAngles, position: (column + 1, 9 - row), isPathCell: isPathCell)
+                            CellView(isCardClicked: $isCardClicked, selectedTower: $selectedTower, trigger: $trigger, position: (column + 1, 9 - row), isPathCell: isPathCell)
                         }
                     }
                 }
@@ -513,7 +541,6 @@ struct ContentView: View {
         @Binding var isCardClicked: Bool
         @Binding var selectedTower: Tower?
         @Binding var trigger: [Bool]
-        @Binding var towerRotateAngles: [Double]
         @ObservedObject var towerData = TowerData.shared
         @EnvironmentObject var towerCardViews: TowerCardViews
         @ObservedObject var coveredCells = CoveredCells.shared
@@ -543,7 +570,7 @@ struct ContentView: View {
                 moneyManager.money -= newTower.price
                 towerData.towers.append(newTower)
                 trigger.append(false)
-                towerRotateAngles.append(-90)
+                towerData.towerRotateAngles.append(0)
                 coveredCells.coveredCells.append(position)
                 attackerTimers.append(nil)
                 isCardClicked = false

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-func produceTowerCards(jsonTowers: [ItemJson]) -> [Tower]{
+func produceTowerCards(jsonTowers: [TowerItemJson]) -> [Tower]{
     var towercards: [Tower] = []
     for i in jsonTowers.indices{
         let itemJson = jsonTowers[i]
@@ -28,8 +28,8 @@ func produceEnemies(jsonEnemies: [EnemyWaveJson]) -> [EnemyWave]{
         for j in enemyWaveJson.enemies.indices{
             let enemy = enemyWaveJson.enemies[j]
             switch enemy.type{
-                case "AttackerEnemy": enemies.append(AttackerEnemy(name: enemy.name, level: 1))
-                case "BossAttackerEnemy": enemies.append(BossAttackEnemy(name: enemy.name, level: 1))
+            case "AttackerEnemy": enemies.append(AttackerEnemy(name: enemy.name, level: enemy.level))
+            case "BossAttackerEnemy": enemies.append(BossAttackEnemy(name: enemy.name, level: enemy.level))
                 default: break
             }
         }

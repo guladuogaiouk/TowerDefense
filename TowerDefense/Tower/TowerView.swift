@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TowerView: View {
     @State var showHpbar: Bool = true
-    @Binding var angle: Double
+    var angle: Double
     @ObservedObject var moneyManager = MoneyManager.shared
     var tower: Tower
     
@@ -41,11 +41,11 @@ struct TowerView: View {
             }
         }
         .onAppear(){
-            if let producerTower = tower as? ProducerTower {
-                withAnimation(.linear(duration: producerTower.produceInterval).repeatForever(autoreverses: false)) {
-                    angle = 360
-                }
-            }
+//            if let producerTower = tower as? ProducerTower {
+//                withAnimation(.linear(duration: producerTower.produceInterval).repeatForever(autoreverses: false)) {
+//                    angle = 360
+//                }
+//            }
         }
     }
 }

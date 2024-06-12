@@ -33,7 +33,7 @@ class ProducerTower: Tower {
             self.timer = Timer.scheduledTimer(withTimeInterval: produceInterval, repeats: true) { [weak self] timer in
                 self?.produceMoney()
             }
-            RunLoop.main.add(self.timer!, forMode: .default)
+//            RunLoop.main.add(self.timer!, forMode: .default)
         }
     }
 
@@ -46,7 +46,7 @@ class ProducerTower: Tower {
                 self.img = "\(self.name).\(self.level)"
             }
         }
-        RunLoop.main.add(self.activatedTimer!, forMode: .default)
+//        RunLoop.main.add(self.activatedTimer!, forMode: .default)
     }
 
     override func createCopy(at position: (Int, Int)) -> ProducerTower {

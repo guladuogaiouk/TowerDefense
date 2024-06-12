@@ -1,5 +1,5 @@
 //
-//  Loseview.swift
+//  WinView.swift
 //  TowerDefense
 //
 //  Created by Tianyu Xu on 2024/6/12.
@@ -7,8 +7,9 @@
 
 import SwiftUI
 
-struct LoseView: View {
+struct SettingView: View {
     @Binding var showView: Int
+    @Binding var level: Int
     var body: some View {
         ZStack{
             Image("boss1.2")
@@ -35,7 +36,7 @@ struct LoseView: View {
                 .fill(Color.white.opacity(0.8))
                 .frame(width: ScreenSize.width * 0.95,height: ScreenSize.height * 0.95)
             VStack{
-                Text("YOU LOSE!")
+                Text("TRY AGAIN?")
                     .font(.system(size: 120))
                     .fontWeight(/*@START_MENU_TOKEN@*/.bold/*@END_MENU_TOKEN@*/)
                 HStack(spacing:cellWidth){
@@ -63,6 +64,7 @@ struct LoseView: View {
                         .onTapGesture {
                             showView = 1
                         }
+                    
                 }
             }
             .foregroundColor(.black)
@@ -71,4 +73,3 @@ struct LoseView: View {
         .frame(maxWidth: .infinity,maxHeight: .infinity)
     }
 }
-
